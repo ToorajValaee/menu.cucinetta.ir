@@ -1,0 +1,16 @@
+{
+  "name": "menu-cucinetta",
+  "version": "1.0.0",
+  "description": "CUCINETTA Menu Management System",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler pages dev public",
+    "deploy": "wrangler pages deploy public",
+    "build": "echo 'Building...'",
+    "kv:init": "wrangler kv:namespace create menu-items --preview false"
+  },
+  "dependencies": {
+    "wrangler": "^3.56.0"
+  },
+  "devDependencies": {}
+}

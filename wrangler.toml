@@ -1,0 +1,37 @@
+name = "menu-cucinetta"
+type = "javascript"
+account_id = ""
+workers_dev = true
+routes = []
+
+[env.production]
+name = "menu-cucinetta"
+account_id = ""
+
+[[kv_namespaces]]
+binding = "MENU_ITEMS"
+id = ""
+preview_id = ""
+
+# For local development KV
+[[kv_namespaces]]
+binding = "MENU_ITEMS"
+id = ""
+
+[env.preview]
+[[kv_namespaces]]
+binding = "MENU_ITEMS"
+id = ""
+preview_id = ""
+
+[build]
+command = "npm install"
+
+[env.production]
+vars = { ADMIN_PASSWORD = "" }
+
+[env.preview]
+vars = { ADMIN_PASSWORD = "" }
+
+[vars]
+ADMIN_PASSWORD = "changeme123"
