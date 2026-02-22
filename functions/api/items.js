@@ -1,5 +1,7 @@
 export async function onRequest(context) {
   const { request, env } = context;
+  const url = new URL(request.url);
+  const path = url.pathname.replace("/api/items", "");
   
   // Check authentication for non-GET requests
   if (request.method !== "GET") {
@@ -10,15 +12,26 @@ export async function onRequest(context) {
         headers: { "Content-Type": "application/json" },
       });
     }
-    // Token validation: token should be non-empty base64 string from auth endpoint
-    // A proper implementation would store tokens in KV with expiry
   }
 
   try {
     if (request.method === "GET") {
       // Fetch all menu items
       const items = await env.MENU_ITEMS.get("items", "json") || [];
-      return new Response(JSON.stringify(items), {
+      // Sort by category order, then by item order
+      const categoriesValue = await env.CATEGORIES.get("categories", "json") || [];
+      const categoryOrderMap = new Map(
+        categoriesValue.map((cat) => [cat.id, cat.order || 0])
+      );
+      
+      const sorted = items.sort((a, b) => {
+        const catA = categoryOrderMap.get(a.category) || 999;
+        const catB = categoryOrderMap.get(b.category) || 999;
+        if (catA !== catB) return catA - catB;
+        return (a.order || 0) - (b.order || 0);
+      });
+      
+      return new Response(JSON.stringify(sorted), {
         headers: { 
           "Content-Type": "application/json",
           "Cache-Control": "public, max-age=300"
@@ -29,10 +42,22 @@ export async function onRequest(context) {
     if (request.method === "POST") {
       // Create new item
       const newItem = await request.json();
+      
+      if (!newItem.category) {
+        return new Response(JSON.stringify({ error: "Category is required" }), {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+      
       newItem.id = Date.now().toString();
       newItem.createdAt = new Date().toISOString();
       
       const items = await env.MENU_ITEMS.get("items", "json") || [];
+      // Set default order for new items
+      const categoryItems = items.filter((item) => item.category === newItem.category);
+      newItem.order = categoryItems.length;
+      
       items.push(newItem);
       
       await env.MENU_ITEMS.put("items", JSON.stringify(items));
@@ -44,6 +69,10 @@ export async function onRequest(context) {
     }
 
     if (request.method === "PUT") {
+      if (path === "/reorder") {
+        return handleReorderItems(context);
+      }
+      
       // Update item
       const { id, ...updateData } = await request.json();
       const items = await env.MENU_ITEMS.get("items", "json") || [];
@@ -57,6 +86,8 @@ export async function onRequest(context) {
       }
       
       items[index] = { ...items[index], ...updateData };
+      items[index].updatedAt = new Date().toISOString();
+      
       await env.MENU_ITEMS.put("items", JSON.stringify(items));
       
       return new Response(JSON.stringify(items[index]), {
@@ -89,3 +120,32 @@ export async function onRequest(context) {
     });
   }
 }
+
+async function handleReorderItems(context) {
+  const { request, env } = context;
+  const data = await request.json();
+  const { orders } = data; // Array of { id, order }
+
+  if (!Array.isArray(orders)) {
+    return new Response(JSON.stringify({ error: "orders must be an array" }), {
+      status: 400,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
+  const items = await env.MENU_ITEMS.get("items", "json") || [];
+  const orderMap = new Map(orders.map((o) => [o.id, o.order]));
+
+  items.forEach((item) => {
+    if (orderMap.has(item.id)) {
+      item.order = orderMap.get(item.id);
+    }
+  });
+
+  await env.MENU_ITEMS.put("items", JSON.stringify(items));
+
+  return new Response(JSON.stringify(items), {
+    headers: { "Content-Type": "application/json" },
+  });
+}
+

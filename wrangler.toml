@@ -11,6 +11,11 @@ binding = "MENU_ITEMS"
 id = "YOUR_NAMESPACE_ID_HERE"
 preview_id = ""
 
+[[kv_namespaces]]
+binding = "CATEGORIES"
+id = "YOUR_CATEGORIES_NAMESPACE_ID_HERE"
+preview_id = ""
+
 [vars]
 ADMIN_PASSWORD = "changeme123"
 
