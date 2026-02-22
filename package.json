@@ -7,10 +7,10 @@
     "dev": "wrangler pages dev public",
     "deploy": "wrangler pages deploy public",
     "build": "echo 'Building...'",
-    "kv:init": "wrangler kv:namespace create menu-items --preview false"
+    "kv:init": "wrangler kv:namespace create menu-items"
   },
   "dependencies": {
-    "wrangler": "^3.56.0"
+    "wrangler": "latest"
   },
   "devDependencies": {}
 }

@@ -13,17 +13,35 @@ Example account ID:
 
 STEP 2: Create KV Namespace  
 ===============================
-1. Open terminal on your PC
-2. Go to your project folder:
+
+OPTION A: Create via Cloudflare Dashboard (EASIEST)
+---------------------------------------------------
+1. Go to: https://dash.cloudflare.com
+2. Click "Workers" → "KV" in the left sidebar
+3. Click "Create namespace"
+4. Type name: "menu-items"
+5. Click "Add"
+6. Copy the "Namespace ID" shown
+7. Replace "YOUR_NAMESPACE_ID_HERE" in wrangler.toml with it
+
+OPTION B: Create via Command Line
+----------------------------------
+1. Go to your project folder:
    cd menu.cucinetta.ir
 
-3. Run:
-   npx wrangler kv:namespace create menu-items
+2. Make sure dependencies are fresh:
+   npm install --force
 
-4. Copy the namespace ID from output:
-   ✨ Created namespace with id: a1b2c3d4e5f6g7h8i9j0k1l2m
+3. Make sure you're logged in:
+   npx wrangler login
 
-5. Replace "YOUR_NAMESPACE_ID_HERE" in wrangler.toml with it
+4. Then create namespace:
+   npx wrangler kv:namespace create "menu-items"
+
+5. Copy the namespace ID from output
+6. Replace "YOUR_NAMESPACE_ID_HERE" in wrangler.toml with it
+
+⭐ RECOMMENDED: Use Option A (Cloudflare Dashboard) - it's faster and simpler!
 
 STEP 3: Set Admin Password
 ===============================
