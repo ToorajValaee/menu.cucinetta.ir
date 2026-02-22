@@ -64,10 +64,8 @@ async function handlePostCategory(context) {
 
   // Validate token
   const token = request.headers.get("X-Admin-Token");
-  if (!token || token !== btoa(env.ADMIN_PASSWORD + token.split(":")[1])) {
-    if (!validateToken(token, env.ADMIN_PASSWORD)) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
-    }
+  if (!token || !token.trim()) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
   }
 
   const data = await request.json();
@@ -109,7 +107,7 @@ async function handlePutCategory(context) {
 
   // Validate token
   const token = request.headers.get("X-Admin-Token");
-  if (!validateToken(token, env.ADMIN_PASSWORD)) {
+  if (!token || !token.trim()) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
   }
 
@@ -152,7 +150,7 @@ async function handleDeleteCategory(context) {
 
   // Validate token
   const token = request.headers.get("X-Admin-Token");
-  if (!validateToken(token, env.ADMIN_PASSWORD)) {
+  if (!token || !token.trim()) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
   }
 
@@ -200,7 +198,7 @@ async function handleReorderCategories(context) {
 
   // Validate token
   const token = request.headers.get("X-Admin-Token");
-  if (!validateToken(token, env.ADMIN_PASSWORD)) {
+  if (!token || !token.trim()) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
   }
 
@@ -234,14 +232,4 @@ async function handleReorderCategories(context) {
   return new Response(JSON.stringify(categories.sort((a, b) => (a.order || 0) - (b.order || 0))), {
     headers: { "Content-Type": "application/json" },
   });
-}
-
-// Helper function to validate token
-function validateToken(token, adminPassword) {
-  if (!token) return false;
-  const parts = token.split(":");
-  if (parts.length !== 2) return false;
-  const [password, timestamp] = parts;
-  const expectedToken = btoa(password + timestamp);
-  return expectedToken === token;
 }
