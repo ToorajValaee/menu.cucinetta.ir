@@ -2,36 +2,20 @@ name = "menu-cucinetta"
 type = "javascript"
 account_id = ""
 workers_dev = true
-routes = []
-
-[env.production]
-name = "menu-cucinetta"
-account_id = ""
-
-[[kv_namespaces]]
-binding = "MENU_ITEMS"
-id = ""
-preview_id = ""
-
-# For local development KV
-[[kv_namespaces]]
-binding = "MENU_ITEMS"
-id = ""
-
-[env.preview]
-[[kv_namespaces]]
-binding = "MENU_ITEMS"
-id = ""
-preview_id = ""
 
 [build]
 command = "npm install"
 
-[env.production]
-vars = { ADMIN_PASSWORD = "" }
-
-[env.preview]
-vars = { ADMIN_PASSWORD = "" }
+[[kv_namespaces]]
+binding = "MENU_ITEMS"
+id = ""
+preview_id = ""
 
 [vars]
 ADMIN_PASSWORD = "changeme123"
+
+# IMPORTANT: Before deploying to production:
+# 1. Replace account_id above with your Cloudflare account ID
+# 2. Replace KV namespace id and preview_id with values from: npm run kv:init
+# 3. Replace ADMIN_PASSWORD with a strong password
+# 4. DO NOT commit real credentials - use environment variables in Cloudflare instead
