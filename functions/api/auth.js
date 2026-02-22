@@ -19,7 +19,7 @@ export async function onRequest(context) {
     }
 
     // Generate a simple token (in production: use JWT)
-    const token = Buffer.from(password + Date.now()).toString("base64");
+    const token = btoa(password + Date.now());
     
     return new Response(JSON.stringify({ 
       token,
