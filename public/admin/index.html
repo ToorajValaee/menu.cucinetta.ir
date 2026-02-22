@@ -482,7 +482,8 @@
       <!-- Categories Tab -->
       <div id="categories" class="tab-content active">
         <button class="success" onclick="openAddCategoryModal()">➕ افزودن دسته‌بندی جدید</button>
-        <div id="categories-container" class="categories-list" style="margin-top: 20px">
+        <div id="categories-container" class="categories-list" style="margin-top: 20px"
+             ondrop="handleCategoryDrop(event)" ondragover="allowDrop(event)">
           <div class="loading">بارگذاری دسته‌بندی‌ها...</div>
         </div>
       </div>
@@ -804,7 +805,7 @@
               <div class="category-header">
                 <h2>${cat.name}</h2>
               </div>
-              <div class="items-grid">
+              <div class="items-grid" data-category="${cat.id}" ondrop="handleItemDrop(event)" ondragover="allowDrop(event)">
                 ${categoryItems
                   .map(
                     (item) => `
@@ -951,6 +952,11 @@
     });
 
     // ====== DRAG AND DROP ======
+    function allowDrop(e) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = "move";
+    }
+
     function startDrag(e, type) {
       draggedItem = e.target.closest("[data-id]");
       draggedItemType = type;
@@ -960,9 +966,108 @@
     function endDrag(e) {
       if (draggedItem) {
         draggedItem.classList.remove("dragging");
-        draggedItem = null;
-        draggedItemType = null;
       }
+    }
+
+    async function handleCategoryDrop(e) {
+      e.preventDefault();
+      if (!draggedItem || draggedItemType !== "category") return;
+
+      const container = document.getElementById("categories-container");
+      const allItems = [...container.querySelectorAll(".category-item")];
+      const draggedIndex = allItems.findIndex((item) => item === draggedItem);
+
+      const mouseY = e.clientY;
+      let dropIndex = draggedIndex;
+
+      for (let i = 0; i < allItems.length; i++) {
+        const rect = allItems[i].getBoundingClientRect();
+        if (mouseY < rect.top + rect.height / 2) {
+          dropIndex = i;
+          break;
+        }
+        dropIndex = i + 1;
+      }
+
+      if (dropIndex !== draggedIndex && dropIndex !== draggedIndex + 1) {
+        const newCategories = [...categories];
+        const [movedCat] = newCategories.splice(draggedIndex, 1);
+        newCategories.splice(dropIndex > draggedIndex ? dropIndex - 1 : dropIndex, 0, movedCat);
+
+        const orders = newCategories.map((cat, idx) => ({ id: cat.id, order: idx }));
+        try {
+          const response = await fetch("/api/categories/reorder", {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              "X-Admin-Token": currentToken,
+            },
+            body: JSON.stringify({ orders }),
+          });
+
+          if (!response.ok) throw new Error("Failed to reorder");
+          categories = newCategories;
+          renderCategories();
+          showSuccess("ترتیب دسته‌بندی‌ها بروزرسانی شد");
+        } catch (error) {
+          showError("خطا در بروزرسانی ترتیب");
+        }
+      }
+
+      draggedItem = null;
+      draggedItemType = null;
+    }
+
+    async function handleItemDrop(e) {
+      e.preventDefault();
+      if (!draggedItem || draggedItemType !== "item") return;
+
+      const grid = e.currentTarget;
+      const categoryId = grid.dataset.category;
+      const allItems = [...grid.querySelectorAll(".item-card")];
+      const draggedIndex = allItems.findIndex((item) => item === draggedItem);
+
+      const mouseX = e.clientX;
+      let dropIndex = draggedIndex;
+
+      for (let i = 0; i < allItems.length; i++) {
+        const rect = allItems[i].getBoundingClientRect();
+        if (mouseX < rect.left + rect.width / 2) {
+          dropIndex = i;
+          break;
+        }
+        dropIndex = i + 1;
+      }
+
+      if (dropIndex !== draggedIndex && dropIndex !== draggedIndex + 1) {
+        const categoryItems = items
+          .filter((item) => item.category === categoryId)
+          .sort((a, b) => (a.order || 0) - (b.order || 0));
+
+        const [movedItem] = categoryItems.splice(draggedIndex, 1);
+        categoryItems.splice(dropIndex > draggedIndex ? dropIndex - 1 : dropIndex, 0, movedItem);
+
+        const orders = categoryItems.map((item, idx) => ({ id: item.id, order: idx }));
+        try {
+          const response = await fetch("/api/items/reorder", {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              "X-Admin-Token": currentToken,
+            },
+            body: JSON.stringify({ orders }),
+          });
+
+          if (!response.ok) throw new Error("Failed to reorder");
+          renderItems();
+          showSuccess("ترتیب منو‌ها بروزرسانی شد");
+        } catch (error) {
+          showError("خطا در بروزرسانی ترتیب");
+        }
+      }
+
+      draggedItem = null;
+      draggedItemType = null;
     }
 
     // ====== MESSAGES ======
