@@ -1,6 +1,6 @@
 name = "menu-cucinetta"
 type = "javascript"
-account_id = ""
+account_id = "YOUR_ACCOUNT_ID_HERE"
 workers_dev = true
 
 [build]
@@ -8,7 +8,7 @@ command = "npm install"
 
 [[kv_namespaces]]
 binding = "MENU_ITEMS"
-id = ""
+id = "YOUR_NAMESPACE_ID_HERE"
 preview_id = ""
 
 [vars]
