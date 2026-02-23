@@ -123,6 +123,16 @@ export async function onRequest(context) {
 
 async function handleReorderItems(context) {
   const { request, env } = context;
+  
+  // Validate token
+  const token = request.headers.get("X-Admin-Token");
+  if (!token || !token.trim()) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+  
   const data = await request.json();
   const { orders } = data; // Array of { id, order }
 

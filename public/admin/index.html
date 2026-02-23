@@ -713,13 +713,12 @@
       if (!confirm("آیا می خواهید این دسته‌بندی را حذف کنید؟")) return;
 
       try {
-        const response = await fetch(`/api/categories`, {
+        const response = await fetch(`/api/categories/${id}`, {
           method: "DELETE",
           headers: {
             "Content-Type": "application/json",
             "X-Admin-Token": currentToken,
           },
-          body: JSON.stringify({ id }),
         });
 
         if (!response.ok) throw new Error("Failed to delete");

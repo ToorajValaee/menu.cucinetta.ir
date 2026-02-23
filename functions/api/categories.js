@@ -15,11 +15,13 @@ export async function onRequest(context) {
       return handlePostCategory(context);
     }
 
+    // PUT /api/categories/reorder - Reorder categories
+    if (method === "PUT" && path === "/reorder") {
+      return handleReorderCategories(context);
+    }
+
     // PUT /api/categories/:id - Update category
-    if (method === "PUT" && path.includes("/")) {
-      if (path === "/reorder") {
-        return handleReorderCategories(context);
-      }
+    if (method === "PUT") {
       return handlePutCategory(context);
     }
 
@@ -37,22 +39,24 @@ export async function onRequest(context) {
 
 async function handleGetCategories(context) {
   const { env } = context;
-  const { value } = await env.CATEGORIES.getWithMetadata("categories");
-
-  if (!value) {
-    return new Response(JSON.stringify([]), {
-      headers: { "Content-Type": "application/json" },
-    });
-  }
-
+  
   try {
+    const value = await env.CATEGORIES.get("categories");
+    
+    if (!value) {
+      return new Response(JSON.stringify([]), {
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
     const categories = JSON.parse(value);
     // Sort by order field
     const sorted = categories.sort((a, b) => (a.order || 0) - (b.order || 0));
     return new Response(JSON.stringify(sorted), {
       headers: { "Content-Type": "application/json" },
     });
-  } catch {
+  } catch (error) {
+    console.error("Get categories error:", error);
     return new Response(JSON.stringify([]), {
       headers: { "Content-Type": "application/json" },
     });
@@ -76,14 +80,14 @@ async function handlePostCategory(context) {
   }
 
   // Get existing categories
-  const { value } = await env.CATEGORIES.getWithMetadata("categories");
   let categories = [];
-  if (value) {
-    try {
+  try {
+    const value = await env.CATEGORIES.get("categories");
+    if (value) {
       categories = JSON.parse(value);
-    } catch {
-      categories = [];
     }
+  } catch {
+    categories = [];
   }
 
   const newCategory = {
@@ -120,14 +124,14 @@ async function handlePutCategory(context) {
     return new Response(JSON.stringify({ error: "Category name is required" }), { status: 400 });
   }
 
-  const { value } = await env.CATEGORIES.getWithMetadata("categories");
   let categories = [];
-  if (value) {
-    try {
+  try {
+    const value = await env.CATEGORIES.get("categories");
+    if (value) {
       categories = JSON.parse(value);
-    } catch {
-      categories = [];
     }
+  } catch {
+    categories = [];
   }
 
   const index = categories.findIndex((cat) => cat.id === id);
@@ -157,14 +161,14 @@ async function handleDeleteCategory(context) {
   const url = new URL(request.url);
   const id = url.pathname.split("/").pop();
 
-  const { value } = await env.CATEGORIES.getWithMetadata("categories");
   let categories = [];
-  if (value) {
-    try {
+  try {
+    const value = await env.CATEGORIES.get("categories");
+    if (value) {
       categories = JSON.parse(value);
-    } catch {
-      categories = [];
     }
+  } catch {
+    categories = [];
   }
 
   const index = categories.findIndex((cat) => cat.id === id);
@@ -175,15 +179,15 @@ async function handleDeleteCategory(context) {
   categories.splice(index, 1);
 
   // Also remove this category's items
-  const { value: itemsValue } = await env.MENU_ITEMS.getWithMetadata("items");
-  if (itemsValue) {
-    try {
+  try {
+    const itemsValue = await env.MENU_ITEMS.get("items");
+    if (itemsValue) {
       let items = JSON.parse(itemsValue);
       items = items.filter((item) => item.category !== id);
       await env.MENU_ITEMS.put("items", JSON.stringify(items));
-    } catch {
-      // Ignore parsing errors
     }
+  } catch {
+    // Ignore item errors
   }
 
   await env.CATEGORIES.put("categories", JSON.stringify(categories));
@@ -209,14 +213,14 @@ async function handleReorderCategories(context) {
     return new Response(JSON.stringify({ error: "orders must be an array" }), { status: 400 });
   }
 
-  const { value } = await env.CATEGORIES.getWithMetadata("categories");
   let categories = [];
-  if (value) {
-    try {
+  try {
+    const value = await env.CATEGORIES.get("categories");
+    if (value) {
       categories = JSON.parse(value);
-    } catch {
-      categories = [];
     }
+  } catch {
+    categories = [];
   }
 
   // Update order values
