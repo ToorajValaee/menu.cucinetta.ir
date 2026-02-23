@@ -4,6 +4,8 @@ export async function onRequest(context) {
   const method = request.method;
   const path = url.pathname.replace("/api/categories", "");
 
+  console.log(`[DEBUG] URL: ${request.url}, Method: ${method}, Path: ${path}`);
+
   try {
     // GET /api/categories - List all categories
     if (method === "GET") {
