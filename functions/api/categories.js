@@ -5,80 +5,98 @@ export async function onRequest(context) {
   const path = url.pathname.replace("/api/categories", "");
 
   console.log(`[DEBUG] URL: ${request.url}, Method: ${method}, Path: ${path}`);
+  // Helper to consistently return JSON with CORS headers
+  const jsonResponse = (body, status = 200) => {
+    return new Response(JSON.stringify(body), {
+      status,
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type, X-Admin-Token",
+      },
+    });
+  };
 
   try {
+    // Handle CORS preflight
+    if (method === "OPTIONS") {
+      return new Response(null, {
+        status: 204,
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+          "Access-Control-Allow-Headers": "Content-Type, X-Admin-Token",
+        },
+      });
+    }
+
     // GET /api/categories - List all categories
     if (method === "GET") {
-      return handleGetCategories(context);
+      return handleGetCategories(context, jsonResponse);
     }
 
     // POST /api/categories - Create new category
     if (method === "POST") {
-      return handlePostCategory(context);
+      return handlePostCategory(context, jsonResponse);
     }
 
     // PUT /api/categories/reorder - Reorder categories
     if (method === "PUT" && path === "/reorder") {
-      return handleReorderCategories(context);
+      return handleReorderCategories(context, jsonResponse);
     }
 
     // PUT /api/categories/:id - Update category
     if (method === "PUT") {
-      return handlePutCategory(context);
+      return handlePutCategory(context, jsonResponse);
     }
 
     // DELETE /api/categories/:id - Delete category
     if (method === "DELETE") {
-      return handleDeleteCategory(context);
+      return handleDeleteCategory(context, jsonResponse);
     }
 
-    return new Response(JSON.stringify({ error: "Method not allowed" }), { status: 405 });
+    return jsonResponse({ error: "Method not allowed" }, 405);
   } catch (error) {
     console.error("Categories API error:", error);
-    return new Response(JSON.stringify({ error: error.message }), { status: 500 });
+    return jsonResponse({ error: error.message }, 500);
   }
 }
 
-async function handleGetCategories(context) {
+async function handleGetCategories(context, jsonResponse) {
   const { env } = context;
   
   try {
     const value = await env.CATEGORIES.get("categories");
     
     if (!value) {
-      return new Response(JSON.stringify([]), {
-        headers: { "Content-Type": "application/json" },
-      });
+      return jsonResponse([], 200);
     }
 
     const categories = JSON.parse(value);
     // Sort by order field
     const sorted = categories.sort((a, b) => (a.order || 0) - (b.order || 0));
-    return new Response(JSON.stringify(sorted), {
-      headers: { "Content-Type": "application/json" },
-    });
+    return jsonResponse(sorted, 200);
   } catch (error) {
     console.error("Get categories error:", error);
-    return new Response(JSON.stringify([]), {
-      headers: { "Content-Type": "application/json" },
-    });
+    return jsonResponse([], 200);
   }
 }
 
-async function handlePostCategory(context) {
+async function handlePostCategory(context, jsonResponse) {
   const { request, env } = context;
 
   // Validate token
   const token = request.headers.get("X-Admin-Token");
   if (!token || !token.trim()) {
-    return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
+    return jsonResponse({ error: "Unauthorized" }, 401);
   }
 
   const data = await request.json();
   const { name } = data;
 
   if (!name || typeof name !== "string" || name.trim() === "") {
-    return new Response(JSON.stringify({ error: "Category name is required" }), { status: 400 });
+    return jsonResponse({ error: "Category name is required" }, 400);
   }
 
   // Get existing categories
@@ -102,19 +120,16 @@ async function handlePostCategory(context) {
   categories.push(newCategory);
   await env.CATEGORIES.put("categories", JSON.stringify(categories));
 
-  return new Response(JSON.stringify(newCategory), {
-    status: 201,
-    headers: { "Content-Type": "application/json" },
-  });
+  return jsonResponse(newCategory, 201);
 }
 
-async function handlePutCategory(context) {
+async function handlePutCategory(context, jsonResponse) {
   const { request, env } = context;
 
   // Validate token
   const token = request.headers.get("X-Admin-Token");
   if (!token || !token.trim()) {
-    return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
+    return jsonResponse({ error: "Unauthorized" }, 401);
   }
 
   const url = new URL(request.url);
@@ -123,7 +138,7 @@ async function handlePutCategory(context) {
   const { name } = data;
 
   if (!name || typeof name !== "string" || name.trim() === "") {
-    return new Response(JSON.stringify({ error: "Category name is required" }), { status: 400 });
+    return jsonResponse({ error: "Category name is required" }, 400);
   }
 
   let categories = [];
@@ -138,7 +153,7 @@ async function handlePutCategory(context) {
 
   const index = categories.findIndex((cat) => cat.id === id);
   if (index === -1) {
-    return new Response(JSON.stringify({ error: "Category not found" }), { status: 404 });
+    return jsonResponse({ error: "Category not found" }, 404);
   }
 
   categories[index].name = name.trim();
@@ -146,18 +161,16 @@ async function handlePutCategory(context) {
 
   await env.CATEGORIES.put("categories", JSON.stringify(categories));
 
-  return new Response(JSON.stringify(categories[index]), {
-    headers: { "Content-Type": "application/json" },
-  });
+  return jsonResponse(categories[index], 200);
 }
 
-async function handleDeleteCategory(context) {
+async function handleDeleteCategory(context, jsonResponse) {
   const { request, env } = context;
 
   // Validate token
   const token = request.headers.get("X-Admin-Token");
   if (!token || !token.trim()) {
-    return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
+    return jsonResponse({ error: "Unauthorized" }, 401);
   }
 
   const url = new URL(request.url);
@@ -175,7 +188,7 @@ async function handleDeleteCategory(context) {
 
   const index = categories.findIndex((cat) => cat.id === id);
   if (index === -1) {
-    return new Response(JSON.stringify({ error: "Category not found" }), { status: 404 });
+    return jsonResponse({ error: "Category not found" }, 404);
   }
 
   categories.splice(index, 1);
@@ -194,25 +207,23 @@ async function handleDeleteCategory(context) {
 
   await env.CATEGORIES.put("categories", JSON.stringify(categories));
 
-  return new Response(JSON.stringify({ success: true }), {
-    headers: { "Content-Type": "application/json" },
-  });
+  return jsonResponse({ success: true }, 200);
 }
 
-async function handleReorderCategories(context) {
+async function handleReorderCategories(context, jsonResponse) {
   const { request, env } = context;
 
   // Validate token
   const token = request.headers.get("X-Admin-Token");
   if (!token || !token.trim()) {
-    return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
+    return jsonResponse({ error: "Unauthorized" }, 401);
   }
 
   const data = await request.json();
   const { orders } = data; // Array of { id, order }
 
   if (!Array.isArray(orders)) {
-    return new Response(JSON.stringify({ error: "orders must be an array" }), { status: 400 });
+    return jsonResponse({ error: "orders must be an array" }, 400);
   }
 
   let categories = [];
@@ -235,7 +246,5 @@ async function handleReorderCategories(context) {
 
   await env.CATEGORIES.put("categories", JSON.stringify(categories));
 
-  return new Response(JSON.stringify(categories.sort((a, b) => (a.order || 0) - (b.order || 0))), {
-    headers: { "Content-Type": "application/json" },
-  });
+  return jsonResponse(categories.sort((a, b) => (a.order || 0) - (b.order || 0)), 200);
 }
