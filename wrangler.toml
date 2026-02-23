@@ -8,12 +8,12 @@ command = "npm install"
 
 [[kv_namespaces]]
 binding = "MENU_ITEMS"
-id = "YOUR_NAMESPACE_ID_HERE"
+id = "c8ab67ddfdeb4999af739b7dd0f60634"
 preview_id = ""
 
 [[kv_namespaces]]
 binding = "CATEGORIES"
-id = "YOUR_CATEGORIES_NAMESPACE_ID_HERE"
+id = "e915265865bc4c43ba0cb9ebdb2aa1d9"
 preview_id = ""
 
 [vars]
