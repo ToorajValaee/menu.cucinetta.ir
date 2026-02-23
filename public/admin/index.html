@@ -1049,8 +1049,8 @@
 
         const orders = categoryItems.map((item, idx) => ({ id: item.id, order: idx }));
         try {
-          const response = await fetch("/api/items/reorder", {
-            method: "PUT",
+          const response = await fetch("/api/items?action=reorder", {
+            method: "POST",
             headers: {
               "Content-Type": "application/json",
               "X-Admin-Token": currentToken,

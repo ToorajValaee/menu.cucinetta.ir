@@ -1,16 +1,39 @@
 export async function onRequest(context) {
   const { request, env } = context;
   const url = new URL(request.url);
+  const method = request.method;
   const path = url.pathname.replace("/api/items", "");
+  
+  // JSON response helper with CORS
+  const jsonResponse = (body, status = 200) => {
+    return new Response(JSON.stringify(body), {
+      status,
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type, X-Admin-Token",
+      },
+    });
+  };
+
+  // Handle CORS preflight
+  if (method === "OPTIONS") {
+    return new Response(null, {
+      status: 204,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type, X-Admin-Token",
+      },
+    });
+  }
   
   // Check authentication for non-GET requests
   if (request.method !== "GET") {
     const token = request.headers.get("X-Admin-Token");
     if (!token || !token.trim()) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { "Content-Type": "application/json" },
-      });
+      return jsonResponse({ error: "Unauthorized" }, 401);
     }
   }
 
@@ -34,20 +57,47 @@ export async function onRequest(context) {
       return new Response(JSON.stringify(sorted), {
         headers: { 
           "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
           "Cache-Control": "public, max-age=300"
         },
       });
     }
 
     if (request.method === "POST") {
-      // Create new item
-      const newItem = await request.json();
+      const raw = await request.text();
+      let data = {};
+      try {
+        if (raw && raw.length) data = JSON.parse(raw);
+      } catch (e) {
+        console.error("Failed to parse JSON body:", e);
+      }
+      const reqUrl = new URL(request.url);
+      const action = (reqUrl.searchParams.get("action") || data.action || "").toLowerCase();
+
+      // Check if this is a reorder action
+      if (action === "reorder") {
+        const orders = data.orders;
+        if (!Array.isArray(orders)) return jsonResponse({ error: "orders must be an array" }, 400);
+
+        const items = await env.MENU_ITEMS.get("items", "json") || [];
+        const orderMap = new Map(orders.map((o) => [o.id, o.order]));
+
+        items.forEach((item) => {
+          if (orderMap.has(item.id)) {
+            item.order = orderMap.get(item.id);
+          }
+        });
+
+        await env.MENU_ITEMS.put("items", JSON.stringify(items));
+
+        return jsonResponse(items, 200);
+      }
+
+      // Create new item (no action or action=create)
+      const newItem = data;
       
       if (!newItem.category) {
-        return new Response(JSON.stringify({ error: "Category is required" }), {
-          status: 400,
-          headers: { "Content-Type": "application/json" },
-        });
+        return jsonResponse({ error: "Category is required" }, 400);
       }
       
       newItem.id = Date.now().toString();
@@ -62,27 +112,17 @@ export async function onRequest(context) {
       
       await env.MENU_ITEMS.put("items", JSON.stringify(items));
       
-      return new Response(JSON.stringify(newItem), {
-        status: 201,
-        headers: { "Content-Type": "application/json" },
-      });
+      return jsonResponse(newItem, 201);
     }
 
     if (request.method === "PUT") {
-      if (path === "/reorder") {
-        return handleReorderItems(context);
-      }
-      
       // Update item
       const { id, ...updateData } = await request.json();
       const items = await env.MENU_ITEMS.get("items", "json") || [];
       
       const index = items.findIndex(item => item.id === id);
       if (index === -1) {
-        return new Response(JSON.stringify({ error: "Item not found" }), {
-          status: 404,
-          headers: { "Content-Type": "application/json" },
-        });
+        return jsonResponse({ error: "Item not found" }, 404);
       }
       
       items[index] = { ...items[index], ...updateData };
@@ -90,9 +130,7 @@ export async function onRequest(context) {
       
       await env.MENU_ITEMS.put("items", JSON.stringify(items));
       
-      return new Response(JSON.stringify(items[index]), {
-        headers: { "Content-Type": "application/json" },
-      });
+      return jsonResponse(items[index], 200);
     }
 
     if (request.method === "DELETE") {
@@ -103,59 +141,13 @@ export async function onRequest(context) {
       items = items.filter(item => item.id !== id);
       await env.MENU_ITEMS.put("items", JSON.stringify(items));
       
-      return new Response(JSON.stringify({ success: true }), {
-        headers: { "Content-Type": "application/json" },
-      });
+      return jsonResponse({ success: true }, 200);
     }
 
-    return new Response(JSON.stringify({ error: "Method not allowed" }), {
-      status: 405,
-      headers: { "Content-Type": "application/json" },
-    });
+    return jsonResponse({ error: "Method not allowed" }, 405);
   } catch (error) {
     console.error("API Error:", error);
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+    return jsonResponse({ error: error.message }, 500);
   }
-}
-
-async function handleReorderItems(context) {
-  const { request, env } = context;
-  
-  // Validate token
-  const token = request.headers.get("X-Admin-Token");
-  if (!token || !token.trim()) {
-    return new Response(JSON.stringify({ error: "Unauthorized" }), {
-      status: 401,
-      headers: { "Content-Type": "application/json" },
-    });
-  }
-  
-  const data = await request.json();
-  const { orders } = data; // Array of { id, order }
-
-  if (!Array.isArray(orders)) {
-    return new Response(JSON.stringify({ error: "orders must be an array" }), {
-      status: 400,
-      headers: { "Content-Type": "application/json" },
-    });
-  }
-
-  const items = await env.MENU_ITEMS.get("items", "json") || [];
-  const orderMap = new Map(orders.map((o) => [o.id, o.order]));
-
-  items.forEach((item) => {
-    if (orderMap.has(item.id)) {
-      item.order = orderMap.get(item.id);
-    }
-  });
-
-  await env.MENU_ITEMS.put("items", JSON.stringify(items));
-
-  return new Response(JSON.stringify(items), {
-    headers: { "Content-Type": "application/json" },
-  });
 }
 
