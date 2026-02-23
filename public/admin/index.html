@@ -614,14 +614,14 @@
       document.getElementById("password").value = "";
     }
 
-    function showAdminPage() {
+    async function showAdminPage() {
       document.getElementById("login-page").style.display = "none";
       document.getElementById("admin-page").style.display = "block";
-      loadCategories();
-      loadItems();
+      await loadCategories();
+      await loadItems();
     }
 
-    function switchTab(tab) {
+    async function switchTab(tab) {
       // Update buttons
       document.querySelectorAll(".tab-button").forEach((btn) => {
         btn.classList.remove("active");
@@ -633,6 +633,13 @@
         content.classList.remove("active");
       });
       document.getElementById(tab).classList.add("active");
+      
+      // Reload data when switching tabs
+      if (tab === "items-tab") {
+        await loadItems();
+      } else if (tab === "categories-tab") {
+        await loadCategories();
+      }
     }
 
     // ====== CATEGORIES ======
