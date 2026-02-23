@@ -713,12 +713,13 @@
       if (!confirm("آیا می خواهید این دسته‌بندی را حذف کنید؟")) return;
 
       try {
-        const response = await fetch(`/api/categories/${id}`, {
-          method: "DELETE",
+        const response = await fetch(`/api/categories?action=delete`, {
+          method: "POST",
           headers: {
             "Content-Type": "application/json",
             "X-Admin-Token": currentToken,
           },
+          body: JSON.stringify({ id }),
         });
 
         if (!response.ok) throw new Error("Failed to delete");
@@ -995,8 +996,8 @@
 
         const orders = newCategories.map((cat, idx) => ({ id: cat.id, order: idx }));
         try {
-          const response = await fetch("/api/categories/reorder", {
-            method: "PUT",
+          const response = await fetch("/api/categories?action=reorder", {
+            method: "POST",
             headers: {
               "Content-Type": "application/json",
               "X-Admin-Token": currentToken,

@@ -4,7 +4,8 @@ export async function onRequest(context) {
   const method = request.method;
   const path = url.pathname.replace("/api/categories", "");
 
-  console.log(`[DEBUG] URL: ${request.url}, Method: ${method}, Path: ${path}`);
+  console.log(`[DEBUG] onRequest URL: ${request.url}, Method: ${method}, Path: ${path}`);
+
   // Helper to consistently return JSON with CORS headers
   const jsonResponse = (body, status = 200) => {
     return new Response(JSON.stringify(body), {
@@ -92,9 +93,83 @@ async function handlePostCategory(context, jsonResponse) {
     return jsonResponse({ error: "Unauthorized" }, 401);
   }
 
-  const data = await request.json();
-  const { name } = data;
+  const raw = await request.text();
+  console.log("[DEBUG] handlePostCategory raw body:", raw);
+  let data = {};
+  try {
+    if (raw && raw.length) data = JSON.parse(raw);
+  } catch (e) {
+    console.error("Failed to parse JSON body:", e);
+  }
+  console.log("[DEBUG] handlePostCategory parsed body:", data);
+  const reqUrl = new URL(request.url);
+  const action = (reqUrl.searchParams.get("action") || data.action || "").toLowerCase();
+  console.log("[DEBUG] action:", action);
+  console.log("[DEBUG] query param action:", reqUrl.searchParams.get("action"));
+  console.log("[DEBUG] data.action:", data.action);
+  console.log("[DEBUG] reqUrl:", request.url);
 
+  // Support action-based POSTs (easier for Pages dev): reorder or delete
+  if (action === "reorder") {
+    console.log("[DEBUG] reorder action triggered");
+    const orders = data.orders;
+    if (!Array.isArray(orders)) {
+      console.log("[DEBUG] orders not an array, returning error");
+      return jsonResponse({ error: "orders must be an array" }, 400);
+    }
+
+    let categories = [];
+    try {
+      const value = await env.CATEGORIES.get("categories");
+      if (value) categories = JSON.parse(value);
+    } catch {
+      categories = [];
+    }
+
+    const orderMap = new Map(orders.map((o) => [o.id, o.order]));
+    categories.forEach((cat) => {
+      if (orderMap.has(cat.id)) cat.order = orderMap.get(cat.id);
+    });
+
+    await env.CATEGORIES.put("categories", JSON.stringify(categories));
+
+    return jsonResponse(categories.sort((a, b) => (a.order || 0) - (b.order || 0)), 200);
+  }
+
+  if (action === "delete") {
+    const id = data.id;
+    if (!id) return jsonResponse({ error: "id is required" }, 400);
+
+    let categories = [];
+    try {
+      const value = await env.CATEGORIES.get("categories");
+      if (value) categories = JSON.parse(value);
+    } catch {
+      categories = [];
+    }
+
+    const index = categories.findIndex((cat) => cat.id === id);
+    if (index === -1) return jsonResponse({ error: "Category not found" }, 404);
+
+    categories.splice(index, 1);
+
+    try {
+      const itemsValue = await env.MENU_ITEMS.get("items");
+      if (itemsValue) {
+        let items = JSON.parse(itemsValue);
+        items = items.filter((item) => item.category !== id);
+        await env.MENU_ITEMS.put("items", JSON.stringify(items));
+      }
+    } catch {
+      // ignore
+    }
+
+    await env.CATEGORIES.put("categories", JSON.stringify(categories));
+    return jsonResponse({ success: true }, 200);
+  }
+
+  // Regular category creation - requires action to be unset or empty, and name to be present
+  const { name } = data;
   if (!name || typeof name !== "string" || name.trim() === "") {
     return jsonResponse({ error: "Category name is required" }, 400);
   }
@@ -133,12 +208,49 @@ async function handlePutCategory(context, jsonResponse) {
   }
 
   const url = new URL(request.url);
-  const id = url.pathname.split("/").pop();
+  let id = url.pathname.split("/").pop();
   const data = await request.json();
   const { name } = data;
 
+  // If this PUT contains orders it's a reorder request coming to /api/categories
+  if (data && Array.isArray(data.orders)) {
+    const orders = data.orders;
+
+    let categories = [];
+    try {
+      const value = await env.CATEGORIES.get("categories");
+      if (value) {
+        categories = JSON.parse(value);
+      }
+    } catch {
+      categories = [];
+    }
+
+    const orderMap = new Map(orders.map((o) => [o.id, o.order]));
+    categories.forEach((cat) => {
+      if (orderMap.has(cat.id)) {
+        cat.order = orderMap.get(cat.id);
+      }
+    });
+
+    await env.CATEGORIES.put("categories", JSON.stringify(categories));
+
+    return jsonResponse(categories.sort((a, b) => (a.order || 0) - (b.order || 0)), 200);
+  }
+
+  // If the client sends PUT to /api/categories (no id in URL), allow id in body
+  if (!id || id === "categories") {
+    if (data && data.id) {
+      id = data.id;
+    }
+  }
+
   if (!name || typeof name !== "string" || name.trim() === "") {
     return jsonResponse({ error: "Category name is required" }, 400);
+  }
+
+  if (!id) {
+    return jsonResponse({ error: "Category id is required" }, 400);
   }
 
   let categories = [];
@@ -174,7 +286,17 @@ async function handleDeleteCategory(context, jsonResponse) {
   }
 
   const url = new URL(request.url);
-  const id = url.pathname.split("/").pop();
+  let id = url.pathname.split("/").pop();
+
+  // If DELETE was sent to /api/categories with id in body, accept that
+  if (!id || id === "categories") {
+    try {
+      const body = await request.json();
+      if (body && body.id) id = body.id;
+    } catch {
+      // ignore
+    }
+  }
 
   let categories = [];
   try {
