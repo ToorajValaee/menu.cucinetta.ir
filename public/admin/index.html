@@ -812,7 +812,7 @@
               <div class="category-header">
                 <h2>${cat.name}</h2>
               </div>
-              <div class="items-grid" data-category="${cat.id}" ondrop="handleItemDrop(event)" ondragover="allowDrop(event)">
+              <div class="items-grid" data-category="${cat.id}">
                 ${categoryItems
                   .map(
                     (item) => `
@@ -838,6 +838,12 @@
       });
 
       container.innerHTML = html;
+
+      // Attach drag/drop listeners to freshly rendered grids
+      document.querySelectorAll('.items-grid').forEach((grid) => {
+        grid.ondragover = allowDrop;
+        grid.ondrop = handleItemDrop;
+      });
     }
 
     function openAddItemModal() {
@@ -967,10 +973,14 @@
     function startDrag(e, type) {
       draggedItem = e.target.closest("[data-id]");
       draggedItemType = type;
-      draggedItem.classList.add("dragging");
+      console.log(`[DRAG START] type=${type}, draggedItem=${draggedItem?.dataset?.id}, element=${e.target.tagName}`);
+      if (draggedItem) {
+        draggedItem.classList.add("dragging");
+      }
     }
 
     function endDrag(e) {
+      console.log(`[DRAG END] draggedItem=${draggedItem?.dataset?.id}, type=${draggedItemType}`);
       if (draggedItem) {
         draggedItem.classList.remove("dragging");
       }
@@ -1027,7 +1037,11 @@
 
     async function handleItemDrop(e) {
       e.preventDefault();
-      if (!draggedItem || draggedItemType !== "item") return;
+      console.log(`[ITEM DROP] draggedItem=${draggedItem?.dataset?.id}, type=${draggedItemType}`);
+      if (!draggedItem || draggedItemType !== "item") {
+        console.log(`[ITEM DROP EARLY EXIT] draggedItem=${draggedItem}, draggedItemType=${draggedItemType}`);
+        return;
+      }
 
       const grid = e.currentTarget;
       const categoryId = grid.dataset.category;
