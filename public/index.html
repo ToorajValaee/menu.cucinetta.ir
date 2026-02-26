@@ -196,6 +196,14 @@
       border-radius:4px;
     }
 
+    .item-underline{
+      width:300px;
+      height:2px;
+      background: #5b2b2f48;
+      margin:12px auto 30px;
+      border-radius:4px;
+    }
+
     .note{
       margin-top:40px;
       font-size:16px;
@@ -288,17 +296,17 @@
       }
     }
 
-    function scrollToCategory(catId){
+    function scrollToCategory(catId) {
+      setActiveQuick(catId, true); // set immediately on click
+
       const target = document.getElementById("cat-" + catId);
       if (!target) return;
 
-      const offset = parseInt(getComputedStyle(document.documentElement)
-        .getPropertyValue("--sticky-offset")) || 0;
+      const offset =
+        parseInt(getComputedStyle(document.documentElement).getPropertyValue("--sticky-offset")) || 0;
 
       const y = target.getBoundingClientRect().top + window.pageYOffset - offset;
       window.scrollTo({ top: y, behavior: "smooth" });
-
-      setActiveQuick(catId, true);
     }
 
     function buildQuickAccess(categories){
@@ -333,28 +341,48 @@
       setActiveQuick(categories[0].id, false);
     }
 
-    function setupCategorySpy(categories){
+    function setupCategorySpy(categories) {
       if (!("IntersectionObserver" in window)) return;
 
-      const observer = new IntersectionObserver((entries)=>{
-        const visible = entries
-          .filter(e => e.isIntersecting)
-          .sort((a,b)=> b.intersectionRatio - a.intersectionRatio)[0];
+      const headerOffset =
+        parseInt(getComputedStyle(document.documentElement).getPropertyValue("--sticky-offset")) || 0;
 
-        if (!visible) return;
+      // Build a list of section title elements
+      const targets = categories
+        .map((c) => document.getElementById("cat-" + c.id))
+        .filter(Boolean);
 
-        const id = visible.target.getAttribute("data-cat-id");
-        if (id) setActiveQuick(id, false);
-      }, {
-        root: null,
-        rootMargin: "-35% 0px -55% 0px",
-        threshold: 0
-      });
+      const observer = new IntersectionObserver(
+        (entries) => {
+          // Collect all visible section titles
+          const visible = entries.filter((e) => e.isIntersecting);
+          if (visible.length === 0) return;
 
-      categories.forEach(cat=>{
-        const title = document.getElementById("cat-" + cat.id);
-        if (title) observer.observe(title);
-      });
+          // Pick the one closest to the top of viewport (below the sticky header)
+          let best = visible[0];
+          let bestDist = Infinity;
+
+          for (const e of visible) {
+            const top = e.boundingClientRect.top;
+            const dist = Math.abs(top - headerOffset);
+            if (dist < bestDist) {
+              bestDist = dist;
+              best = e;
+            }
+          }
+
+          const id = best.target.getAttribute("data-cat-id");
+          if (id) setActiveQuick(id, false);
+        },
+        {
+          root: null,
+          // shift detection area down by header height so "current" means below sticky header
+          rootMargin: `-${headerOffset}px 0px -70% 0px`,
+          threshold: [0, 0.1, 0.25, 0.5, 0.75, 1],
+        }
+      );
+
+      targets.forEach((t) => observer.observe(t));
     }
 
     function renderItem(item){
@@ -373,6 +401,7 @@
           ${item.description ? `<p>${item.description}</p>` : ""}
           <div class="price">${item.price}</div>
         </div>
+        <div class="item-underline"></div>
       `;
     }
 
