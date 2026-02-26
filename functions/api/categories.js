@@ -66,9 +66,10 @@ export async function onRequest(context) {
 
 async function handleGetCategories(context, jsonResponse) {
   const { env } = context;
-  
+  const brand = env.BRAND_KEY;
+
   try {
-    const value = await env.CATEGORIES.get("categories");
+    const value = await env.MENU_DATA.get(`${brand}-categories`);
     
     if (!value) {
       return jsonResponse([], 200);
@@ -111,6 +112,7 @@ async function handlePostCategory(context, jsonResponse) {
 
   // Support action-based POSTs (easier for Pages dev): reorder or delete
   if (action === "reorder") {
+    const brand = env.BRAND_KEY;
     console.log("[DEBUG] reorder action triggered");
     const orders = data.orders;
     if (!Array.isArray(orders)) {
@@ -120,7 +122,7 @@ async function handlePostCategory(context, jsonResponse) {
 
     let categories = [];
     try {
-      const value = await env.CATEGORIES.get("categories");
+      const value = await env.MENU_DATA.get(`${brand}-categories`);
       if (value) categories = JSON.parse(value);
     } catch {
       categories = [];
@@ -131,18 +133,19 @@ async function handlePostCategory(context, jsonResponse) {
       if (orderMap.has(cat.id)) cat.order = orderMap.get(cat.id);
     });
 
-    await env.CATEGORIES.put("categories", JSON.stringify(categories));
+    await env.MENU_DATA.put(`${brand}-categories`, JSON.stringify(categories));
 
     return jsonResponse(categories.sort((a, b) => (a.order || 0) - (b.order || 0)), 200);
   }
 
   if (action === "delete") {
+    const brand = env.BRAND_KEY;
     const id = data.id;
     if (!id) return jsonResponse({ error: "id is required" }, 400);
 
     let categories = [];
     try {
-      const value = await env.CATEGORIES.get("categories");
+      const value = await env.MENU_DATA.get(`${brand}-categories`);
       if (value) categories = JSON.parse(value);
     } catch {
       categories = [];
@@ -154,17 +157,17 @@ async function handlePostCategory(context, jsonResponse) {
     categories.splice(index, 1);
 
     try {
-      const itemsValue = await env.MENU_ITEMS.get("items");
+      const itemsValue = await env.MENU_DATA.get(`${brand}-items`);
       if (itemsValue) {
         let items = JSON.parse(itemsValue);
         items = items.filter((item) => item.category !== id);
-        await env.MENU_ITEMS.put("items", JSON.stringify(items));
+        await env.MENU_DATA.put(`${brand}-items`, JSON.stringify(items));
       }
     } catch {
       // ignore
     }
 
-    await env.CATEGORIES.put("categories", JSON.stringify(categories));
+    await env.MENU_DATA.put(`${brand}-categories`, JSON.stringify(categories));
     return jsonResponse({ success: true }, 200);
   }
 
@@ -177,7 +180,7 @@ async function handlePostCategory(context, jsonResponse) {
   // Get existing categories
   let categories = [];
   try {
-    const value = await env.CATEGORIES.get("categories");
+    const value = await env.MENU_DATA.get(`${brand}-categories`);
     if (value) {
       categories = JSON.parse(value);
     }
@@ -193,12 +196,13 @@ async function handlePostCategory(context, jsonResponse) {
   };
 
   categories.push(newCategory);
-  await env.CATEGORIES.put("categories", JSON.stringify(categories));
+  await env.MENU_DATA.put(`${brand}-categories`, JSON.stringify(categories));
 
   return jsonResponse(newCategory, 201);
 }
 
 async function handlePutCategory(context, jsonResponse) {
+  const brand = env.BRAND_KEY;
   const { request, env } = context;
 
   // Validate token
@@ -218,7 +222,7 @@ async function handlePutCategory(context, jsonResponse) {
 
     let categories = [];
     try {
-      const value = await env.CATEGORIES.get("categories");
+      const value = await env.MENU_DATA.get(`${brand}-categories`);
       if (value) {
         categories = JSON.parse(value);
       }
@@ -233,7 +237,7 @@ async function handlePutCategory(context, jsonResponse) {
       }
     });
 
-    await env.CATEGORIES.put("categories", JSON.stringify(categories));
+    await env.MENU_DATA.put(`${brand}-categories`, JSON.stringify(categories));
 
     return jsonResponse(categories.sort((a, b) => (a.order || 0) - (b.order || 0)), 200);
   }
@@ -255,7 +259,7 @@ async function handlePutCategory(context, jsonResponse) {
 
   let categories = [];
   try {
-    const value = await env.CATEGORIES.get("categories");
+    const value = await env.MENU_DATA.get(`${brand}-categories`);
     if (value) {
       categories = JSON.parse(value);
     }
@@ -271,12 +275,13 @@ async function handlePutCategory(context, jsonResponse) {
   categories[index].name = name.trim();
   categories[index].updatedAt = new Date().toISOString();
 
-  await env.CATEGORIES.put("categories", JSON.stringify(categories));
+  await env.MENU_DATA.put(`${brand}-categories`, JSON.stringify(categories));
 
   return jsonResponse(categories[index], 200);
 }
 
 async function handleDeleteCategory(context, jsonResponse) {
+  const brand = env.BRAND_KEY;
   const { request, env } = context;
 
   // Validate token
@@ -300,7 +305,7 @@ async function handleDeleteCategory(context, jsonResponse) {
 
   let categories = [];
   try {
-    const value = await env.CATEGORIES.get("categories");
+    const value = await env.MENU_DATA.get(`${brand}-categories`);
     if (value) {
       categories = JSON.parse(value);
     }
@@ -317,22 +322,23 @@ async function handleDeleteCategory(context, jsonResponse) {
 
   // Also remove this category's items
   try {
-    const itemsValue = await env.MENU_ITEMS.get("items");
+    const itemsValue = await env.MENU_DATA.get(`${brand}-items`);
     if (itemsValue) {
       let items = JSON.parse(itemsValue);
       items = items.filter((item) => item.category !== id);
-      await env.MENU_ITEMS.put("items", JSON.stringify(items));
+      await env.MENU_DATA.put(`${brand}-items`, JSON.stringify(items));
     }
   } catch {
     // Ignore item errors
   }
 
-  await env.CATEGORIES.put("categories", JSON.stringify(categories));
+  await env.MENU_DATA.put(`${brand}-categories`, JSON.stringify(categories));
 
   return jsonResponse({ success: true }, 200);
 }
 
 async function handleReorderCategories(context, jsonResponse) {
+  const brand = env.BRAND_KEY;
   const { request, env } = context;
 
   // Validate token
@@ -350,7 +356,7 @@ async function handleReorderCategories(context, jsonResponse) {
 
   let categories = [];
   try {
-    const value = await env.CATEGORIES.get("categories");
+    const value = await env.MENU_DATA.get(`${brand}-categories`);
     if (value) {
       categories = JSON.parse(value);
     }
@@ -366,7 +372,7 @@ async function handleReorderCategories(context, jsonResponse) {
     }
   });
 
-  await env.CATEGORIES.put("categories", JSON.stringify(categories));
+  await env.MENU_DATA.put(`${brand}-categories`, JSON.stringify(categories));
 
   return jsonResponse(categories.sort((a, b) => (a.order || 0) - (b.order || 0)), 200);
 }

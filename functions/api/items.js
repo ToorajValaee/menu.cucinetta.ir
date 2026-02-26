@@ -3,7 +3,7 @@ export async function onRequest(context) {
   const url = new URL(request.url);
   const method = request.method;
   const path = url.pathname.replace("/api/items", "");
-  
+  const brand = env.BRAND_KEY;
   // JSON response helper with CORS
   const jsonResponse = (body, status = 200) => {
     return new Response(JSON.stringify(body), {
@@ -40,9 +40,9 @@ export async function onRequest(context) {
   try {
     if (request.method === "GET") {
       // Fetch all menu items
-      const items = await env.MENU_ITEMS.get("items", "json") || [];
+      const items = await env.MENU_DATA.get(`${brand}-items`, "json") || [];
       // Sort by category order, then by item order
-      const categoriesValue = await env.CATEGORIES.get("categories", "json") || [];
+      const categoriesValue = await env.MENU_DATA.get(`${brand}-categories`, "json") || [];
       const categoryOrderMap = new Map(
         categoriesValue.map((cat) => [cat.id, cat.order || 0])
       );
@@ -79,7 +79,7 @@ export async function onRequest(context) {
         const orders = data.orders;
         if (!Array.isArray(orders)) return jsonResponse({ error: "orders must be an array" }, 400);
 
-        const items = await env.MENU_ITEMS.get("items", "json") || [];
+        const items = await env.MENU_DATA.get(`${brand}-items`, "json") || [];
         const orderMap = new Map(orders.map((o) => [o.id, o.order]));
 
         items.forEach((item) => {
@@ -88,7 +88,7 @@ export async function onRequest(context) {
           }
         });
 
-        await env.MENU_ITEMS.put("items", JSON.stringify(items));
+        await env.MENU_DATA.put(`${brand}-items`, JSON.stringify(items));
 
         return jsonResponse(items, 200);
       }
@@ -103,14 +103,14 @@ export async function onRequest(context) {
       newItem.id = Date.now().toString();
       newItem.createdAt = new Date().toISOString();
       
-      const items = await env.MENU_ITEMS.get("items", "json") || [];
+      const items = await env.MENU_DATA.get(`${brand}-items`, "json") || [];
       // Set default order for new items
       const categoryItems = items.filter((item) => item.category === newItem.category);
       newItem.order = categoryItems.length;
       
       items.push(newItem);
       
-      await env.MENU_ITEMS.put("items", JSON.stringify(items));
+      await env.MENU_DATA.put(`${brand}-items`, JSON.stringify(items));
       
       return jsonResponse(newItem, 201);
     }
@@ -118,7 +118,7 @@ export async function onRequest(context) {
     if (request.method === "PUT") {
       // Update item
       const { id, ...updateData } = await request.json();
-      const items = await env.MENU_ITEMS.get("items", "json") || [];
+      const items = await env.MENU_DATA.get(`${brand}-items`, "json") || [];
       
       const index = items.findIndex(item => item.id === id);
       if (index === -1) {
@@ -128,7 +128,7 @@ export async function onRequest(context) {
       items[index] = { ...items[index], ...updateData };
       items[index].updatedAt = new Date().toISOString();
       
-      await env.MENU_ITEMS.put("items", JSON.stringify(items));
+      await env.MENU_DATA.put(`${brand}-items`, JSON.stringify(items));
       
       return jsonResponse(items[index], 200);
     }
@@ -136,10 +136,10 @@ export async function onRequest(context) {
     if (request.method === "DELETE") {
       // Delete item
       const { id } = await request.json();
-      let items = await env.MENU_ITEMS.get("items", "json") || [];
+      let items = await env.MENU_DATA.get(`${brand}-items`, "json") || [];
       
       items = items.filter(item => item.id !== id);
-      await env.MENU_ITEMS.put("items", JSON.stringify(items));
+      await env.MENU_DATA.put(`${brand}-items`, JSON.stringify(items));
       
       return jsonResponse({ success: true }, 200);
     }

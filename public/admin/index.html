@@ -3,11 +3,12 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>پنل مدیریت | CUCINETTA</title>
+  <title id="page-title">پنل مدیریت</title>
+
   <style>
     @font-face {
       font-family: "Morabba";
-      src: 
+      src:
         url("/fonts/Morabba-Light.woff") format("woff"),
         url("/fonts/Morabba-Regular.ttf") format("truetype");
       font-weight: 300;
@@ -15,15 +16,14 @@
       font-display: swap;
     }
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     :root {
       --bg: #ded7c5;
-      --maroon: #5b2b2f;
-      --light-maroon: #8b4549;
-      --accent: #d4a574;
+      --primary-color: #5b2b2f;
+      --text-color: #5b2b2f;
+      --accent-color: #d4a574;
+
       --danger: #dc3545;
       --success: #28a745;
       --max: 1200px;
@@ -33,7 +33,8 @@
       margin: 0;
       background: var(--bg);
       font-family: "Morabba", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
-      color: var(--maroon);
+      color: var(--text-color);
+      transition: background 0.3s ease, color 0.3s ease;
     }
 
     .container {
@@ -43,7 +44,7 @@
     }
 
     header {
-      background: var(--maroon);
+      background: var(--primary-color);
       color: white;
       padding: 20px 0;
       margin-bottom: 30px;
@@ -68,6 +69,7 @@
       gap: 10px;
       margin-bottom: 20px;
       border-bottom: 2px solid #ddd;
+      flex-wrap: wrap;
     }
 
     .tab-button {
@@ -78,77 +80,47 @@
       cursor: pointer;
       font-family: "Morabba", system-ui, sans-serif;
       font-size: 14px;
-      font-weight: 700;
+      font-weight: 800;
       color: #666;
-      transition: all 0.3s;
+      transition: all 0.2s;
     }
 
     .tab-button.active {
-      color: var(--maroon);
-      border-bottom-color: var(--maroon);
+      color: var(--primary-color);
+      border-bottom-color: var(--primary-color);
     }
 
-    .tab-button:hover {
-      color: var(--maroon);
-    }
+    .tab-button:hover { color: var(--primary-color); }
 
-    .tab-content {
-      display: none;
-    }
-
-    .tab-content.active {
-      display: block;
-    }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
 
     button {
-      background: var(--accent);
-      color: var(--maroon);
+      background: var(--accent-color);
+      color: var(--text-color);
       border: none;
       padding: 10px 20px;
       border-radius: 6px;
       font-size: 14px;
-      font-weight: 700;
+      font-weight: 800;
       font-family: "Morabba", system-ui, sans-serif;
       cursor: pointer;
-      transition: background 0.3s;
+      transition: filter 0.2s;
     }
 
-    button:hover {
-      background: #c99765;
-    }
+    button:hover { filter: brightness(0.95); }
 
-    button.danger {
-      background: var(--danger);
-      color: white;
-    }
+    button.danger { background: var(--danger); color: white; }
+    button.success { background: var(--success); color: white; }
 
-    button.danger:hover {
-      background: #c82333;
-    }
-
-    button.success {
-      background: var(--success);
-      color: white;
-    }
-
-    button.success:hover {
-      background: #218838;
-    }
-
-    button:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
+    button:disabled { opacity: 0.6; cursor: not-allowed; }
 
     /* ====== Modal ====== */
     .modal {
       display: none;
       position: fixed;
       z-index: 1000;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
+      inset: 0;
       background: rgba(0, 0, 0, 0.5);
       overflow: auto;
     }
@@ -163,7 +135,7 @@
       background: white;
       padding: 30px;
       border-radius: 12px;
-      max-width: 500px;
+      max-width: 520px;
       width: 95%;
       max-height: 90vh;
       overflow-y: auto;
@@ -174,11 +146,10 @@
       justify-content: space-between;
       align-items: center;
       margin-bottom: 20px;
+      gap: 10px;
     }
 
-    .modal-header h2 {
-      margin: 0;
-    }
+    .modal-header h2 { margin: 0; }
 
     .modal-close {
       background: none;
@@ -186,48 +157,41 @@
       font-size: 28px;
       cursor: pointer;
       padding: 0;
-      width: 30px;
-      height: 30px;
+      width: 34px;
+      height: 34px;
       display: flex;
       align-items: center;
       justify-content: center;
+      color: #333;
     }
 
     /* ====== Form ====== */
-    .form-group {
-      margin-bottom: 20px;
-    }
+    .form-group { margin-bottom: 20px; }
 
     label {
       display: block;
-      font-weight: 700;
+      font-weight: 800;
       margin-bottom: 8px;
       font-size: 14px;
     }
 
-    input,
-    textarea,
-    select {
+    input, textarea, select {
       width: 100%;
       padding: 10px;
-      border: 2px solid var(--maroon);
+      border: 2px solid var(--primary-color);
       border-radius: 6px;
       font-family: inherit;
       font-size: 14px;
-      color: var(--maroon);
+      color: var(--text-color);
+      background: white;
     }
 
-    textarea {
-      resize: vertical;
-      min-height: 80px;
-    }
+    textarea { resize: vertical; min-height: 80px; }
 
-    input:focus,
-    textarea:focus,
-    select:focus {
+    input:focus, textarea:focus, select:focus {
       outline: none;
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(212, 165, 116, 0.2);
+      border-color: var(--accent-color);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-color) 25%, transparent);
     }
 
     /* ====== Categories Section ====== */
@@ -247,33 +211,18 @@
       margin-bottom: 10px;
       align-items: center;
       cursor: move;
-      border-left: 4px solid var(--maroon);
+      border-right: 4px solid var(--primary-color);
     }
 
-    .category-item.dragging {
-      opacity: 0.5;
-      background: #e9e9e9;
-    }
+    .category-item.dragging { opacity: 0.5; background: #e9e9e9; }
+    .category-item-content { flex: 1; }
+    .category-item-name { font-weight: 900; font-size: 16px; margin: 0; }
 
-    .category-item-content {
-      flex: 1;
-    }
-
-    .category-item-name {
-      font-weight: 700;
-      font-size: 16px;
-      margin: 0;
-    }
-
-    .category-item-actions {
-      display: flex;
-      gap: 8px;
-    }
+    .category-item-actions { display: flex; gap: 8px; }
+    .category-item-actions button { padding: 8px 10px; }
 
     /* ====== Items Grid ====== */
-    .items-by-category {
-      margin-top: 30px;
-    }
+    .items-by-category { margin-top: 30px; }
 
     .category-section {
       background: white;
@@ -288,13 +237,10 @@
       align-items: center;
       margin-bottom: 20px;
       padding-bottom: 15px;
-      border-bottom: 2px solid var(--maroon);
+      border-bottom: 2px solid var(--primary-color);
     }
 
-    .category-header h2 {
-      margin: 0;
-      color: var(--maroon);
-    }
+    .category-header h2 { margin: 0; color: var(--primary-color); }
 
     .items-grid {
       display: grid;
@@ -307,7 +253,7 @@
       border-radius: 8px;
       padding: 15px;
       border: 2px solid #e9e9e9;
-      transition: transform 0.3s, box-shadow 0.3s;
+      transition: transform 0.2s, box-shadow 0.2s;
       cursor: move;
     }
 
@@ -316,10 +262,7 @@
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
 
-    .item-card.dragging {
-      opacity: 0.5;
-      background: #e9e9e9;
-    }
+    .item-card.dragging { opacity: 0.5; background: #e9e9e9; }
 
     .item-card img {
       width: 100%;
@@ -329,36 +272,13 @@
       margin-bottom: 10px;
     }
 
-    .item-card h3 {
-      margin: 8px 0;
-      font-size: 14px;
-    }
+    .item-card h3 { margin: 8px 0; font-size: 14px; }
+    .item-card p { margin: 4px 0; font-size: 12px; color: #666; line-height: 1.3; }
 
-    .item-card p {
-      margin: 4px 0;
-      font-size: 12px;
-      color: #666;
-      line-height: 1.3;
-    }
+    .item-price { font-weight: 900; color: var(--primary-color); margin: 8px 0; font-size: 12px; }
 
-    .item-price {
-      font-weight: 700;
-      color: var(--maroon);
-      margin: 8px 0;
-      font-size: 12px;
-    }
-
-    .item-actions {
-      display: flex;
-      gap: 6px;
-      margin-top: 10px;
-    }
-
-    .item-actions button {
-      flex: 1;
-      padding: 6px 8px;
-      font-size: 11px;
-    }
+    .item-actions { display: flex; gap: 6px; margin-top: 10px; }
+    .item-actions button { flex: 1; padding: 6px 8px; font-size: 11px; }
 
     .error {
       background: #f8d7da;
@@ -378,11 +298,7 @@
       border: 1px solid #c3e6cb;
     }
 
-    .loading {
-      text-align: center;
-      padding: 40px 20px;
-      color: #999;
-    }
+    .loading { text-align: center; padding: 40px 20px; color: #999; }
 
     .login-page {
       display: flex;
@@ -396,15 +312,11 @@
       padding: 40px;
       border-radius: 12px;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      max-width: 400px;
+      max-width: 420px;
       width: 95%;
     }
 
-    .login-box h1 {
-      text-align: center;
-      color: var(--maroon);
-      margin-bottom: 30px;
-    }
+    .login-box h1 { text-align: center; color: var(--primary-color); margin-bottom: 30px; }
 
     .image-preview {
       width: 100%;
@@ -416,28 +328,12 @@
       display: block;
     }
 
-    .empty-state {
-      text-align: center;
-      padding: 40px;
-      color: #999;
-    }
+    .empty-state { text-align: center; padding: 40px; color: #999; }
 
     @media (max-width: 768px) {
-      .items-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .modal-content {
-        padding: 20px;
-      }
-
-      header h1 {
-        font-size: 20px;
-      }
-
-      .tabs {
-        flex-wrap: wrap;
-      }
+      .items-grid { grid-template-columns: 1fr; }
+      .modal-content { padding: 20px; }
+      header h1 { font-size: 20px; }
     }
   </style>
 </head>
@@ -446,7 +342,7 @@
   <!-- Login Page -->
   <div id="login-page" class="login-page">
     <div class="login-box">
-      <h1>ورود به پنل مدیریت</h1>
+      <h1 id="login-title">ورود به پنل مدیریت</h1>
       <div id="login-error"></div>
       <form id="login-form">
         <div class="form-group">
@@ -462,9 +358,9 @@
   <div id="admin-page" style="display: none">
     <header>
       <div class="container">
-        <h1>🍝 پنل مدیریت منو CUCINETTA</h1>
+        <h1 id="admin-header-title">🍝 پنل مدیریت منو</h1>
         <div class="header-actions">
-          <button onclick="logout()">🚪 خروج</button>
+          <button id="logout-btn" type="button">🚪 خروج</button>
         </div>
       </div>
     </header>
@@ -475,22 +371,21 @@
 
       <!-- Tabs -->
       <div class="tabs">
-        <button class="tab-button active" onclick="switchTab('categories')">📑 دسته‌بندی</button>
-        <button class="tab-button" onclick="switchTab('items')">🍽️ منو</button>
+        <button class="tab-button active" type="button" data-tab="categories">📑 دسته‌بندی</button>
+        <button class="tab-button" type="button" data-tab="items">🍽️ منو</button>
       </div>
 
       <!-- Categories Tab -->
       <div id="categories" class="tab-content active">
-        <button class="success" onclick="openAddCategoryModal()">➕ افزودن دسته‌بندی جدید</button>
-        <div id="categories-container" class="categories-list" style="margin-top: 20px"
-             ondrop="handleCategoryDrop(event)" ondragover="allowDrop(event)">
+        <button class="success" type="button" id="add-category-btn">➕ افزودن دسته‌بندی جدید</button>
+        <div id="categories-container" class="categories-list" style="margin-top: 20px">
           <div class="loading">بارگذاری دسته‌بندی‌ها...</div>
         </div>
       </div>
 
       <!-- Items Tab -->
       <div id="items" class="tab-content">
-        <button class="success" onclick="openAddItemModal()">➕ افزودن منو جدید</button>
+        <button class="success" type="button" id="add-item-btn">➕ افزودن منو جدید</button>
         <div id="items-container" class="items-by-category" style="margin-top: 20px">
           <div class="loading">بارگذاری منو‌ها...</div>
         </div>
@@ -499,33 +394,33 @@
   </div>
 
   <!-- Add/Edit Category Modal -->
-  <div id="category-modal" class="modal">
-    <div class="modal-content">
+  <div id="category-modal" class="modal" aria-hidden="true">
+    <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="category-modal-title">
       <div class="modal-header">
         <h2 id="category-modal-title">افزودن دسته‌بندی جدید</h2>
-        <button class="modal-close" onclick="closeCategoryModal()">×</button>
+        <button class="modal-close" type="button" aria-label="بستن" id="close-category-modal">×</button>
       </div>
-      <form id="category-form" onsubmit="handleCategoryFormSubmit(event)">
+      <form id="category-form">
         <div class="form-group">
           <label for="category-name">نام دسته‌بندی</label>
           <input type="text" id="category-name" required />
         </div>
         <div style="display: flex; gap: 10px">
           <button type="submit" class="success" style="flex: 1">ذخیره</button>
-          <button type="button" onclick="closeCategoryModal()" style="flex: 1">لغو</button>
+          <button type="button" style="flex: 1" id="cancel-category-modal">لغو</button>
         </div>
       </form>
     </div>
   </div>
 
   <!-- Add/Edit Item Modal -->
-  <div id="item-modal" class="modal">
-    <div class="modal-content">
+  <div id="item-modal" class="modal" aria-hidden="true">
+    <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="item-modal-title">
       <div class="modal-header">
         <h2 id="item-modal-title">افزودن منو جدید</h2>
-        <button class="modal-close" onclick="closeItemModal()">×</button>
+        <button class="modal-close" type="button" aria-label="بستن" id="close-item-modal">×</button>
       </div>
-      <form id="item-form" onsubmit="handleItemFormSubmit(event)">
+      <form id="item-form">
         <div class="form-group">
           <label for="item-category">دسته‌بندی</label>
           <select id="item-category" required>
@@ -551,454 +446,389 @@
         <div class="form-group">
           <label for="item-image">URL تصویر</label>
           <input type="url" id="item-image" placeholder="https://example.com/image.jpg" />
-          <img id="item-image-preview" class="image-preview" style="display: none" />
+          <img id="item-image-preview" class="image-preview" style="display: none" alt="پیش‌نمایش تصویر" />
         </div>
 
         <div style="display: flex; gap: 10px">
           <button type="submit" class="success" style="flex: 1">ذخیره</button>
-          <button type="button" onclick="closeItemModal()" style="flex: 1">لغو</button>
+          <button type="button" style="flex: 1" id="cancel-item-modal">لغو</button>
         </div>
       </form>
     </div>
   </div>
 
   <script>
-    let currentToken = null;
-    let currentEditId = null;
-    let currentEditType = null;
-    let categories = [];
-    let items = [];
-    let draggedItem = null;
-    let draggedItemType = null;
+    // ========= State =========
+    const state = {
+      token: null,
+      edit: { id: null, type: null },
+      categories: [],
+      items: [],
+      drag: { el: null, type: null },
+      brand: null,
+    };
 
-    // Check if user is logged in
+    const $ = (id) => document.getElementById(id);
+
+    // ========= Branding via /api/public-config =========
+    async function loadPublicConfig() {
+      try {
+        const res = await fetch("/api/public-config");
+        if (!res.ok) return null;
+        return await res.json();
+      } catch {
+        return null;
+      }
+    }
+
+    function applyPublicConfig(cfg) {
+      if (!cfg) return;
+
+      const brand = cfg.brandName || "";
+      state.brand = cfg;
+
+      document.title = `پنل مدیریت | ${brand}`;
+      const pt = $("page-title");
+      if (pt) pt.textContent = `پنل مدیریت | ${brand}`;
+
+      const headerTitle = $("admin-header-title");
+      if (headerTitle) headerTitle.textContent = `🍝 پنل مدیریت منو ${brand}`;
+
+      // Theme vars
+      if (cfg.theme?.bg) document.documentElement.style.setProperty("--bg", cfg.theme.bg);
+      if (cfg.theme?.primary) document.documentElement.style.setProperty("--primary-color", cfg.theme.primary);
+      if (cfg.theme?.text) document.documentElement.style.setProperty("--text-color", cfg.theme.text);
+      if (cfg.theme?.accent) document.documentElement.style.setProperty("--accent-color", cfg.theme.accent);
+    }
+
+    // ========= Auth =========
     function checkAuth() {
       const token = localStorage.getItem("admin_token");
       if (token) {
-        currentToken = token;
+        state.token = token;
         showAdminPage();
       }
     }
 
-    // Login
-    document.getElementById("login-form").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const password = document.getElementById("password").value;
+    async function login(password) {
+      const response = await fetch("/api/auth", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password }),
+      });
 
-      try {
-        const response = await fetch("/api/auth", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ password }),
-        });
+      if (!response.ok) throw new Error("رمز عبور نادرست است");
+      const data = await response.json();
 
-        if (!response.ok) {
-          throw new Error("رمز عبور نادرست است");
-        }
-
-        const data = await response.json();
-        currentToken = data.token;
-        localStorage.setItem("admin_token", data.token);
-        document.getElementById("login-error").innerHTML = "";
-        showAdminPage();
-      } catch (error) {
-        document.getElementById("login-error").innerHTML = `<div class="error">${error.message}</div>`;
-      }
-    });
+      state.token = data.token;
+      localStorage.setItem("admin_token", data.token);
+    }
 
     function logout() {
       localStorage.removeItem("admin_token");
-      currentToken = null;
-      document.getElementById("login-page").style.display = "flex";
-      document.getElementById("admin-page").style.display = "none";
-      document.getElementById("password").value = "";
+      state.token = null;
+      $("login-page").style.display = "flex";
+      $("admin-page").style.display = "none";
+      $("password").value = "";
+      $("login-error").innerHTML = "";
     }
 
     async function showAdminPage() {
-      document.getElementById("login-page").style.display = "none";
-      document.getElementById("admin-page").style.display = "block";
-      await loadCategories();
-      await loadItems();
+      $("login-page").style.display = "none";
+      $("admin-page").style.display = "block";
+      await Promise.all([loadCategories(), loadItems()]);
     }
 
-    async function switchTab(tab) {
-      // Update buttons
-      document.querySelectorAll(".tab-button").forEach((btn) => {
-        btn.classList.remove("active");
-      });
-      event.target.classList.add("active");
+    // ========= Helpers =========
+    function showSuccess(message) {
+      const el = $("success-message");
+      el.innerHTML = `<div class="success-msg">${message}</div>`;
+      setTimeout(() => (el.innerHTML = ""), 3000);
+    }
 
-      // Update content
-      document.querySelectorAll(".tab-content").forEach((content) => {
-        content.classList.remove("active");
+    function showError(message) {
+      const el = $("error-message");
+      el.innerHTML = `<div class="error">${message}</div>`;
+      setTimeout(() => (el.innerHTML = ""), 3000);
+    }
+
+    async function api(path, { method = "GET", body, auth = false } = {}) {
+      const headers = { "Content-Type": "application/json" };
+      if (auth && state.token) headers["X-Admin-Token"] = state.token;
+
+      const res = await fetch(path, {
+        method,
+        headers,
+        body: body ? JSON.stringify(body) : undefined,
       });
-      document.getElementById(tab).classList.add("active");
-      
-      // Reload data when switching tabs
-      if (tab === "items-tab") {
-        await loadItems();
-      } else if (tab === "categories-tab") {
-        await loadCategories();
+
+      if (!res.ok) {
+        const text = await res.text().catch(() => "");
+        throw new Error(text || `Request failed (${res.status})`);
       }
+
+      const contentType = res.headers.get("content-type") || "";
+      if (contentType.includes("application/json")) return await res.json();
+      return null;
     }
 
-    // ====== CATEGORIES ======
+    // ========= Tabs =========
+    function switchTab(tab) {
+      document.querySelectorAll(".tab-button").forEach((btn) => btn.classList.remove("active"));
+      document.querySelectorAll(".tab-content").forEach((content) => content.classList.remove("active"));
+
+      document.querySelector(`.tab-button[data-tab='${tab}']`).classList.add("active");
+      $(tab).classList.add("active");
+    }
+
+    // ========= Categories =========
     async function loadCategories() {
       try {
-        const response = await fetch("/api/categories");
-        if (!response.ok) throw new Error("Failed to load categories");
-
-        categories = await response.json();
+        state.categories = await api("/api/categories");
         renderCategories();
         updateCategoryDropdown();
-      } catch (error) {
-        console.error("Error loading categories:", error);
+      } catch (e) {
+        console.error(e);
+        $("categories-container").innerHTML = `<div class="error">خطا در بارگذاری دسته‌بندی‌ها</div>`;
       }
     }
 
     function renderCategories() {
-      const container = document.getElementById("categories-container");
+      const container = $("categories-container");
+      const cats = state.categories;
 
-      if (categories.length === 0) {
+      if (!cats.length) {
         container.innerHTML = '<div class="empty-state">هیچ دسته‌بندی موجود نیست</div>';
         return;
       }
 
-      container.innerHTML = categories
-        .map(
-          (cat) => `
-        <div class="category-item" draggable="true" data-id="${cat.id}" 
-             ondragstart="startDrag(event, 'category')" 
-             ondragend="endDrag(event)">
+      container.innerHTML = cats.map((cat) => `
+        <div class="category-item" draggable="true" data-id="${cat.id}"
+             data-drag="category">
           <span style="margin-right: 10px">⋮⋮</span>
           <div class="category-item-content">
             <p class="category-item-name">${cat.name}</p>
           </div>
           <div class="category-item-actions">
-            <button onclick="editCategory('${cat.id}')">✏️</button>
-            <button class="danger" onclick="deleteCategory('${cat.id}')">🗑️</button>
+            <button type="button" data-action="edit-category" data-id="${cat.id}">✏️</button>
+            <button type="button" class="danger" data-action="delete-category" data-id="${cat.id}">🗑️</button>
           </div>
         </div>
-      `
-        )
-        .join("");
+      `).join("");
+
+      // Container handles drop
+      container.ondragover = allowDrop;
+      container.ondrop = handleCategoryDrop;
     }
 
     function updateCategoryDropdown() {
-      const select = document.getElementById("item-category");
-      const options = ['<option value="">انتخاب دسته‌بندی...</option>'];
-      categories.forEach((cat) => {
-        options.push(`<option value="${cat.id}">${cat.name}</option>`);
-      });
-      select.innerHTML = options.join("");
+      const select = $("item-category");
+      const opts = ['<option value="">انتخاب دسته‌بندی...</option>'];
+      state.categories.forEach((cat) => opts.push(`<option value="${cat.id}">${cat.name}</option>`));
+      select.innerHTML = opts.join("");
     }
 
-    function openAddCategoryModal() {
-      currentEditId = null;
-      document.getElementById("category-modal-title").textContent = "افزودن دسته‌بندی جدید";
-      document.getElementById("category-form").reset();
-      document.getElementById("category-modal").classList.add("active");
+    function openCategoryModal(mode, category) {
+      state.edit.type = "category";
+      state.edit.id = mode === "edit" ? category.id : null;
+
+      $("category-modal-title").textContent = mode === "edit" ? "ویرایش دسته‌بندی" : "افزودن دسته‌بندی جدید";
+      $("category-name").value = mode === "edit" ? (category.name || "") : "";
+
+      $("category-modal").classList.add("active");
+      $("category-modal").setAttribute("aria-hidden", "false");
     }
 
     function closeCategoryModal() {
-      document.getElementById("category-modal").classList.remove("active");
-      document.getElementById("category-form").reset();
-      currentEditId = null;
+      $("category-modal").classList.remove("active");
+      $("category-modal").setAttribute("aria-hidden", "true");
+      $("category-form").reset();
+      state.edit = { id: null, type: null };
     }
 
-    async function editCategory(id) {
-      const cat = categories.find((c) => c.id === id);
-      if (cat) {
-        currentEditId = id;
-        document.getElementById("category-modal-title").textContent = "ویرایش دسته‌بندی";
-        document.getElementById("category-name").value = cat.name;
-        document.getElementById("category-modal").classList.add("active");
+    async function saveCategory(name) {
+      if (state.edit.id) {
+        await api("/api/categories", { method: "PUT", body: { id: state.edit.id, name }, auth: true });
+        showSuccess("دسته‌بندی ویرایش شد");
+      } else {
+        await api("/api/categories", { method: "POST", body: { name }, auth: true });
+        showSuccess("دسته‌بندی افزوده شد");
       }
+      closeCategoryModal();
+      await Promise.all([loadCategories(), loadItems()]);
     }
 
     async function deleteCategory(id) {
       if (!confirm("آیا می خواهید این دسته‌بندی را حذف کنید؟")) return;
 
-      try {
-        const response = await fetch(`/api/categories?action=delete`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "X-Admin-Token": currentToken,
-          },
-          body: JSON.stringify({ id }),
-        });
-
-        if (!response.ok) throw new Error("Failed to delete");
-
-        showSuccess("دسته‌بندی با موفقیت حذف شد");
-        loadCategories();
-        loadItems();
-      } catch (error) {
-        showError("خطا در حذف دسته‌بندی");
-      }
+      await api("/api/categories?action=delete", { method: "POST", body: { id }, auth: true });
+      showSuccess("دسته‌بندی با موفقیت حذف شد");
+      await Promise.all([loadCategories(), loadItems()]);
     }
 
-    async function handleCategoryFormSubmit(e) {
-      e.preventDefault();
-      const name = document.getElementById("category-name").value;
-
-      try {
-        let response;
-        if (currentEditId) {
-          response = await fetch(`/api/categories`, {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-              "X-Admin-Token": currentToken,
-            },
-            body: JSON.stringify({ id: currentEditId, name }),
-          });
-        } else {
-          response = await fetch("/api/categories", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "X-Admin-Token": currentToken,
-            },
-            body: JSON.stringify({ name }),
-          });
-        }
-
-        if (!response.ok) throw new Error("Failed to save");
-
-        showSuccess(currentEditId ? "دسته‌بندی ویرایش شد" : "دسته‌بندی افزوده شد");
-        closeCategoryModal();
-        loadCategories();
-        loadItems();
-      } catch (error) {
-        showError("خطا در ذخیره دسته‌بندی");
-      }
-    }
-
-    // ====== ITEMS ======
+    // ========= Items =========
     async function loadItems() {
       try {
-        const response = await fetch("/api/items");
-        if (!response.ok) throw new Error("Failed to load items");
-
-        items = await response.json();
+        state.items = await api("/api/items");
         renderItems();
-      } catch (error) {
-        console.error("Error loading items:", error);
-        document.getElementById("items-container").innerHTML = `<div class="error">${error.message}</div>`;
+      } catch (e) {
+        console.error(e);
+        $("items-container").innerHTML = `<div class="error">خطا در بارگذاری منو‌ها</div>`;
       }
     }
 
     function renderItems() {
-      const container = document.getElementById("items-container");
+      const container = $("items-container");
 
-      if (!categories.length) {
+      if (!state.categories.length) {
         container.innerHTML = '<div class="empty-state">ابتدا دسته‌بندی‌ها را ایجاد کنید</div>';
         return;
       }
 
-      if (!items.length) {
+      if (!state.items.length) {
         container.innerHTML = '<div class="empty-state">هیچ منویی موجود نیست</div>';
         return;
       }
 
       let html = "";
-      categories.forEach((cat) => {
-        const categoryItems = items.filter((item) => item.category === cat.id);
-        if (categoryItems.length) {
-          html += `
-            <div class="category-section">
-              <div class="category-header">
-                <h2>${cat.name}</h2>
-              </div>
-              <div class="items-grid" data-category="${cat.id}">
-                ${categoryItems
-                  .map(
-                    (item) => `
-                  <div class="item-card" draggable="true" data-id="${item.id}"
-                       ondragstart="startDrag(event, 'item')"
-                       ondragend="endDrag(event)">
-                    ${item.image ? `<img src="${item.image}" alt="${item.name}" onerror="this.style.display='none'" />` : ""}
-                    <h3>${item.name}</h3>
-                    ${item.description ? `<p>${item.description}</p>` : ""}
-                    <div class="item-price">${item.price}</div>
-                    <div class="item-actions">
-                      <button onclick="editItem('${item.id}')">✏️</button>
-                      <button class="danger" onclick="deleteItem('${item.id}')">🗑️</button>
-                    </div>
-                  </div>
-                `
-                  )
-                  .join("")}
-              </div>
+      state.categories.forEach((cat) => {
+        const categoryItems = state.items
+          .filter((item) => item.category === cat.id)
+          .sort((a, b) => (a.order || 0) - (b.order || 0));
+
+        if (!categoryItems.length) return;
+
+        html += `
+          <div class="category-section">
+            <div class="category-header">
+              <h2>${cat.name}</h2>
             </div>
-          `;
-        }
+            <div class="items-grid" data-category="${cat.id}"></div>
+          </div>
+        `;
       });
 
       container.innerHTML = html;
 
-      // Attach drag/drop listeners to freshly rendered grids
-      document.querySelectorAll('.items-grid').forEach((grid) => {
+      // Fill grids + attach drag/drop
+      state.categories.forEach((cat) => {
+        const grid = container.querySelector(`.items-grid[data-category="${cat.id}"]`);
+        if (!grid) return;
+
+        const categoryItems = state.items
+          .filter((item) => item.category === cat.id)
+          .sort((a, b) => (a.order || 0) - (b.order || 0));
+
+        if (!categoryItems.length) return;
+
+        grid.innerHTML = categoryItems.map((item) => `
+          <div class="item-card" draggable="true" data-id="${item.id}" data-drag="item">
+            ${item.image ? `<img src="${item.image}" alt="${item.name}" onerror="this.style.display='none'" />` : ""}
+            <h3>${item.name}</h3>
+            ${item.description ? `<p>${item.description}</p>` : ""}
+            <div class="item-price">${item.price}</div>
+            <div class="item-actions">
+              <button type="button" data-action="edit-item" data-id="${item.id}">✏️</button>
+              <button type="button" class="danger" data-action="delete-item" data-id="${item.id}">🗑️</button>
+            </div>
+          </div>
+        `).join("");
+
         grid.ondragover = allowDrop;
         grid.ondrop = handleItemDrop;
       });
     }
 
-    function openAddItemModal() {
-      currentEditId = null;
-      document.getElementById("item-modal-title").textContent = "افزودن منو جدید";
-      document.getElementById("item-form").reset();
-      document.getElementById("item-image-preview").style.display = "none";
-      document.getElementById("item-modal").classList.add("active");
+    function openItemModal(mode, item) {
+      state.edit.type = "item";
+      state.edit.id = mode === "edit" ? item.id : null;
+
+      $("item-modal-title").textContent = mode === "edit" ? "ویرایش منو" : "افزودن منو جدید";
+
+      $("item-category").value = mode === "edit" ? (item.category || "") : "";
+      $("item-name").value = mode === "edit" ? (item.name || "") : "";
+      $("item-description").value = mode === "edit" ? (item.description || "") : "";
+      $("item-price").value = mode === "edit" ? (item.price || "") : "";
+      $("item-image").value = mode === "edit" ? (item.image || "") : "";
+
+      // preview
+      const preview = $("item-image-preview");
+      if (mode === "edit" && item.image) {
+        preview.src = item.image;
+        preview.style.display = "block";
+      } else {
+        preview.style.display = "none";
+        preview.removeAttribute("src");
+      }
+
+      $("item-modal").classList.add("active");
+      $("item-modal").setAttribute("aria-hidden", "false");
     }
 
     function closeItemModal() {
-      document.getElementById("item-modal").classList.remove("active");
-      document.getElementById("item-form").reset();
-      currentEditId = null;
+      $("item-modal").classList.remove("active");
+      $("item-modal").setAttribute("aria-hidden", "true");
+      $("item-form").reset();
+      $("item-image-preview").style.display = "none";
+      state.edit = { id: null, type: null };
     }
 
-    async function editItem(id) {
-      const item = items.find((i) => i.id === id);
-      if (item) {
-        currentEditId = id;
-        document.getElementById("item-modal-title").textContent = "ویرایش منو";
-        document.getElementById("item-category").value = item.category;
-        document.getElementById("item-name").value = item.name;
-        document.getElementById("item-description").value = item.description || "";
-        document.getElementById("item-price").value = item.price;
-        document.getElementById("item-image").value = item.image || "";
+    async function saveItem(payload) {
+      if (!payload.category) throw new Error("لطفا دسته‌بندی را انتخاب کنید");
 
-        if (item.image) {
-          document.getElementById("item-image-preview").src = item.image;
-          document.getElementById("item-image-preview").style.display = "block";
-        }
-
-        document.getElementById("item-modal").classList.add("active");
+      if (state.edit.id) {
+        await api("/api/items", { method: "PUT", body: { id: state.edit.id, ...payload }, auth: true });
+        showSuccess("منو ویرایش شد");
+      } else {
+        await api("/api/items", { method: "POST", body: payload, auth: true });
+        showSuccess("منو افزوده شد");
       }
+
+      closeItemModal();
+      await loadItems();
     }
 
     async function deleteItem(id) {
       if (!confirm("آیا می خواهید این منو را حذف کنید؟")) return;
 
-      try {
-        const response = await fetch("/api/items", {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-            "X-Admin-Token": currentToken,
-          },
-          body: JSON.stringify({ id }),
-        });
-
-        if (!response.ok) throw new Error("Failed to delete");
-
-        showSuccess("منو با موفقیت حذف شد");
-        loadItems();
-      } catch (error) {
-        showError("خطا در حذف منو");
-      }
+      await api("/api/items", { method: "DELETE", body: { id }, auth: true });
+      showSuccess("منو با موفقیت حذف شد");
+      await loadItems();
     }
 
-    async function handleItemFormSubmit(e) {
-      e.preventDefault();
-
-      const item = {
-        category: document.getElementById("item-category").value,
-        name: document.getElementById("item-name").value,
-        description: document.getElementById("item-description").value,
-        price: document.getElementById("item-price").value,
-        image: document.getElementById("item-image").value,
-      };
-
-      if (!item.category) {
-        showError("لطفا دسته‌بندی را انتخاب کنید");
-        return;
-      }
-
-      try {
-        let response;
-        if (currentEditId) {
-          response = await fetch("/api/items", {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-              "X-Admin-Token": currentToken,
-            },
-            body: JSON.stringify({ id: currentEditId, ...item }),
-          });
-        } else {
-          response = await fetch("/api/items", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "X-Admin-Token": currentToken,
-            },
-            body: JSON.stringify(item),
-          });
-        }
-
-        if (!response.ok) throw new Error("Failed to save");
-
-        showSuccess(currentEditId ? "منو ویرایش شد" : "منو افزوده شد");
-        closeItemModal();
-        loadItems();
-      } catch (error) {
-        showError("خطا در ذخیره منو");
-      }
-    }
-
-    // Preview image
-    document.getElementById("item-image").addEventListener("input", (e) => {
-      const preview = document.getElementById("item-image-preview");
-      if (e.target.value) {
-        preview.src = e.target.value;
-        preview.style.display = "block";
-        preview.onerror = () => {
-          preview.style.display = "none";
-        };
-      } else {
-        preview.style.display = "none";
-      }
-    });
-
-    // ====== DRAG AND DROP ======
+    // ========= Drag & Drop =========
     function allowDrop(e) {
       e.preventDefault();
-      e.dataTransfer.dropEffect = "move";
+      if (e.dataTransfer) e.dataTransfer.dropEffect = "move";
     }
 
-    function startDrag(e, type) {
-      draggedItem = e.target.closest("[data-id]");
-      draggedItemType = type;
-      console.log(`[DRAG START] type=${type}, draggedItem=${draggedItem?.dataset?.id}, element=${e.target.tagName}`);
-      if (draggedItem) {
-        draggedItem.classList.add("dragging");
-      }
+    function startDrag(e) {
+      const dragEl = e.target.closest("[data-id]");
+      if (!dragEl) return;
+      state.drag.el = dragEl;
+      state.drag.type = dragEl.getAttribute("data-drag");
+      dragEl.classList.add("dragging");
     }
 
-    function endDrag(e) {
-      console.log(`[DRAG END] draggedItem=${draggedItem?.dataset?.id}, type=${draggedItemType}`);
-      if (draggedItem) {
-        draggedItem.classList.remove("dragging");
-      }
+    function endDrag() {
+      if (state.drag.el) state.drag.el.classList.remove("dragging");
+      state.drag.el = null;
+      state.drag.type = null;
     }
 
     async function handleCategoryDrop(e) {
       e.preventDefault();
-      if (!draggedItem || draggedItemType !== "category") return;
+      if (!state.drag.el || state.drag.type !== "category") return;
 
-      const container = document.getElementById("categories-container");
-      const allItems = [...container.querySelectorAll(".category-item")];
-      const draggedIndex = allItems.findIndex((item) => item === draggedItem);
+      const container = $("categories-container");
+      const allEls = [...container.querySelectorAll(".category-item")];
+      const draggedIndex = allEls.findIndex((x) => x === state.drag.el);
 
       const mouseY = e.clientY;
       let dropIndex = draggedIndex;
 
-      for (let i = 0; i < allItems.length; i++) {
-        const rect = allItems[i].getBoundingClientRect();
+      for (let i = 0; i < allEls.length; i++) {
+        const rect = allEls[i].getBoundingClientRect();
         if (mouseY < rect.top + rect.height / 2) {
           dropIndex = i;
           break;
@@ -1006,53 +836,44 @@
         dropIndex = i + 1;
       }
 
-      if (dropIndex !== draggedIndex && dropIndex !== draggedIndex + 1) {
-        const newCategories = [...categories];
-        const [movedCat] = newCategories.splice(draggedIndex, 1);
-        newCategories.splice(dropIndex > draggedIndex ? dropIndex - 1 : dropIndex, 0, movedCat);
-
-        const orders = newCategories.map((cat, idx) => ({ id: cat.id, order: idx }));
-        try {
-          const response = await fetch("/api/categories?action=reorder", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "X-Admin-Token": currentToken,
-            },
-            body: JSON.stringify({ orders }),
-          });
-
-          if (!response.ok) throw new Error("Failed to reorder");
-          categories = newCategories;
-          renderCategories();
-          showSuccess("ترتیب دسته‌بندی‌ها بروزرسانی شد");
-        } catch (error) {
-          showError("خطا در بروزرسانی ترتیب");
-        }
+      if (dropIndex === draggedIndex || dropIndex === draggedIndex + 1) {
+        endDrag();
+        return;
       }
 
-      draggedItem = null;
-      draggedItemType = null;
+      const newCats = [...state.categories];
+      const [moved] = newCats.splice(draggedIndex, 1);
+      newCats.splice(dropIndex > draggedIndex ? dropIndex - 1 : dropIndex, 0, moved);
+
+      const orders = newCats.map((cat, idx) => ({ id: cat.id, order: idx }));
+
+      try {
+        await api("/api/categories?action=reorder", { method: "POST", body: { orders }, auth: true });
+        state.categories = newCats;
+        renderCategories();
+        showSuccess("ترتیب دسته‌بندی‌ها بروزرسانی شد");
+      } catch {
+        showError("خطا در بروزرسانی ترتیب");
+      } finally {
+        endDrag();
+      }
     }
 
     async function handleItemDrop(e) {
       e.preventDefault();
-      console.log(`[ITEM DROP] draggedItem=${draggedItem?.dataset?.id}, type=${draggedItemType}`);
-      if (!draggedItem || draggedItemType !== "item") {
-        console.log(`[ITEM DROP EARLY EXIT] draggedItem=${draggedItem}, draggedItemType=${draggedItemType}`);
-        return;
-      }
+      if (!state.drag.el || state.drag.type !== "item") return;
 
       const grid = e.currentTarget;
       const categoryId = grid.dataset.category;
-      const allItems = [...grid.querySelectorAll(".item-card")];
-      const draggedIndex = allItems.findIndex((item) => item === draggedItem);
+
+      const allEls = [...grid.querySelectorAll(".item-card")];
+      const draggedIndex = allEls.findIndex((x) => x === state.drag.el);
 
       const mouseX = e.clientX;
       let dropIndex = draggedIndex;
 
-      for (let i = 0; i < allItems.length; i++) {
-        const rect = allItems[i].getBoundingClientRect();
+      for (let i = 0; i < allEls.length; i++) {
+        const rect = allEls[i].getBoundingClientRect();
         if (mouseX < rect.left + rect.width / 2) {
           dropIndex = i;
           break;
@@ -1060,52 +881,158 @@
         dropIndex = i + 1;
       }
 
-      if (dropIndex !== draggedIndex && dropIndex !== draggedIndex + 1) {
-        const categoryItems = items
-          .filter((item) => item.category === categoryId)
-          .sort((a, b) => (a.order || 0) - (b.order || 0));
-
-        const [movedItem] = categoryItems.splice(draggedIndex, 1);
-        categoryItems.splice(dropIndex > draggedIndex ? dropIndex - 1 : dropIndex, 0, movedItem);
-
-        const orders = categoryItems.map((item, idx) => ({ id: item.id, order: idx }));
-        try {
-          const response = await fetch("/api/items?action=reorder", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "X-Admin-Token": currentToken,
-            },
-            body: JSON.stringify({ orders }),
-          });
-
-          if (!response.ok) throw new Error("Failed to reorder");
-          await loadItems();
-          showSuccess("ترتیب منو‌ها بروزرسانی شد");
-        } catch (error) {
-          showError("خطا در بروزرسانی ترتیب");
-        }
+      if (dropIndex === draggedIndex || dropIndex === draggedIndex + 1) {
+        endDrag();
+        return;
       }
 
-      draggedItem = null;
-      draggedItemType = null;
+      const categoryItems = state.items
+        .filter((it) => it.category === categoryId)
+        .sort((a, b) => (a.order || 0) - (b.order || 0));
+
+      const [moved] = categoryItems.splice(draggedIndex, 1);
+      categoryItems.splice(dropIndex > draggedIndex ? dropIndex - 1 : dropIndex, 0, moved);
+
+      const orders = categoryItems.map((it, idx) => ({ id: it.id, order: idx }));
+
+      try {
+        await api("/api/items?action=reorder", { method: "POST", body: { orders }, auth: true });
+        showSuccess("ترتیب منو‌ها بروزرسانی شد");
+        await loadItems();
+      } catch {
+        showError("خطا در بروزرسانی ترتیب");
+      } finally {
+        endDrag();
+      }
     }
 
-    // ====== MESSAGES ======
-    function showSuccess(message) {
-      const el = document.getElementById("success-message");
-      el.innerHTML = `<div class="success-msg">${message}</div>`;
-      setTimeout(() => (el.innerHTML = ""), 3000);
-    }
+    // ========= Event wiring =========
+    document.addEventListener("dragstart", (e) => {
+      if (e.target.closest("[data-drag]")) startDrag(e);
+    });
+    document.addEventListener("dragend", endDrag);
 
-    function showError(message) {
-      const el = document.getElementById("error-message");
-      el.innerHTML = `<div class="error">${message}</div>`;
-      setTimeout(() => (el.innerHTML = ""), 3000);
-    }
+    $("logout-btn").addEventListener("click", logout);
 
-    // Initialize
-    checkAuth();
+    document.querySelectorAll(".tab-button").forEach((btn) => {
+      btn.addEventListener("click", () => switchTab(btn.dataset.tab));
+    });
+
+    $("add-category-btn").addEventListener("click", () => openCategoryModal("add", {}));
+    $("add-item-btn").addEventListener("click", () => openItemModal("add", {}));
+
+    $("close-category-modal").addEventListener("click", closeCategoryModal);
+    $("cancel-category-modal").addEventListener("click", closeCategoryModal);
+
+    $("close-item-modal").addEventListener("click", closeItemModal);
+    $("cancel-item-modal").addEventListener("click", closeItemModal);
+
+    // Modal backdrop click to close
+    $("category-modal").addEventListener("click", (e) => {
+      if (e.target === $("category-modal")) closeCategoryModal();
+    });
+    $("item-modal").addEventListener("click", (e) => {
+      if (e.target === $("item-modal")) closeItemModal();
+    });
+
+    // Login
+    $("login-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const password = $("password").value;
+
+      try {
+        await login(password);
+        $("login-error").innerHTML = "";
+        await showAdminPage();
+      } catch (error) {
+        $("login-error").innerHTML = `<div class="error">${error.message}</div>`;
+      }
+    });
+
+    // Category form submit
+    $("category-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      try {
+        await saveCategory($("category-name").value.trim());
+      } catch {
+        showError("خطا در ذخیره دسته‌بندی");
+      }
+    });
+
+    // Item form submit
+    $("item-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const payload = {
+        category: $("item-category").value,
+        name: $("item-name").value.trim(),
+        description: $("item-description").value,
+        price: $("item-price").value,
+        image: $("item-image").value,
+      };
+
+      try {
+        await saveItem(payload);
+      } catch (err) {
+        showError(err.message || "خطا در ذخیره منو");
+      }
+    });
+
+    // Image preview
+    $("item-image").addEventListener("input", (e) => {
+      const preview = $("item-image-preview");
+      const url = e.target.value.trim();
+      if (!url) {
+        preview.style.display = "none";
+        preview.removeAttribute("src");
+        return;
+      }
+      preview.src = url;
+      preview.style.display = "block";
+      preview.onerror = () => {
+        preview.style.display = "none";
+        preview.removeAttribute("src");
+      };
+    });
+
+    // Delegate edit/delete actions
+    document.addEventListener("click", async (e) => {
+      const btn = e.target.closest("[data-action]");
+      if (!btn) return;
+
+      const action = btn.dataset.action;
+      const id = btn.dataset.id;
+
+      try {
+        if (action === "edit-category") {
+          const cat = state.categories.find((c) => c.id === id);
+          if (cat) openCategoryModal("edit", cat);
+        }
+
+        if (action === "delete-category") {
+          await deleteCategory(id);
+        }
+
+        if (action === "edit-item") {
+          const item = state.items.find((i) => i.id === id);
+          if (item) openItemModal("edit", item);
+        }
+
+        if (action === "delete-item") {
+          await deleteItem(id);
+        }
+      } catch (err) {
+        console.error(err);
+        showError("خطا در انجام عملیات");
+      }
+    });
+
+    // ========= Init =========
+    (async () => {
+      const cfg = await loadPublicConfig();
+      applyPublicConfig(cfg);
+      checkAuth();
+    })();
   </script>
 </body>
 </html>
