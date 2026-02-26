@@ -3,11 +3,11 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>غذای اصلی | CUCINETTA</title>
+  <title>CUCINETTA</title>
   <style>
     @font-face {
       font-family: "Morabba";
-      src: 
+      src:
         url("/fonts/Morabba-Light.woff") format("woff"),
         url("/fonts/Morabba-Regular.ttf") format("truetype");
       font-weight: 300;
@@ -20,17 +20,18 @@
       --bg: #ded7c5;
       --maroon: #5b2b2f;
       --max: 900px;
+
+      /* quick access behavior */
+      --quick-top-offset: 90px; /* adjust if you add a fixed header */
     }
 
     @media (min-width: 900px) {
-      :root {
-        --waves: 10;
-      }
+      :root { --waves: 10; }
     }
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
 
     body {
       margin: 0;
@@ -41,11 +42,7 @@
     }
 
     /* ====== Wave SVG container ====== */
-    .wave svg {
-      display: block;
-      width: 100%;
-      height: 50px;
-    }
+    .wave svg { display: block; width: 100%; height: 50px; }
 
     .wave {
       height: 28px;
@@ -75,35 +72,59 @@
     .logo {
       width: 100%;
       max-width: 520px;
-      margin: 10px auto 30px;
+      margin: 10px auto 18px;
       display: block;
     }
 
-    .logo-svg {
-      display: block;
-      width: 100%;
-      height: auto;
+    .logo-svg { display: block; width: 100%; height: auto; }
+
+    /* ====== Quick Category Access ====== */
+    .quick-access-wrap {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: var(--bg);
+      padding: 10px 0 16px;
+      margin-bottom: 10px;
+      border-bottom: 1px solid rgba(91, 43, 47, 0.12);
+      backdrop-filter: blur(6px);
     }
 
-    /* ====== Title ====== */
-    .title {
-      font-size: 28px;
+    .quick-access {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      padding: 0 2px;
+      scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .quick-access::-webkit-scrollbar { display: none; }
+
+    .quick-btn {
+      flex: 0 0 auto;
+      background: #ffffff;
+      border: 2px solid var(--maroon);
+      color: var(--maroon);
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-size: 14px;
       font-weight: 800;
-      margin: 0;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: transform 0.15s ease, background 0.15s ease, color 0.15s ease;
     }
 
-    .underline {
-      width: 200px;
-      height: 4px;
+    .quick-btn:active { transform: scale(0.98); }
+
+    .quick-btn:hover,
+    .quick-btn.active {
       background: var(--maroon);
-      margin: 12px auto 30px;
-      border-radius: 4px;
+      color: #fff;
     }
 
     /* ====== Menu Items ====== */
-    .item {
-      margin: 36px 0;
-    }
+    .item { margin: 36px 0; }
 
     .img-frame {
       width: 100%;
@@ -118,23 +139,18 @@
 
     .img-frame img {
       position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
       object-fit: cover;
       opacity: 0;
       transition: opacity 0.3s;
     }
 
-    .img-frame img.loaded {
-      opacity: 1;
-    }
+    .img-frame img.loaded { opacity: 1; }
 
     .img-frame .placeholder {
       position: absolute;
-      top: 50%;
-      left: 50%;
+      top: 50%; left: 50%;
       transform: translate(-50%, -50%);
       color: #999;
       font-size: 14px;
@@ -162,9 +178,9 @@
 
     .category-title {
       font-size: 28px;
-      font-weight: 800;
-      margin: 40px 0 20px;
-      margin-top: 60px;
+      font-weight: 900;
+      margin: 56px 0 16px;
+      scroll-margin-top: var(--quick-top-offset);
     }
 
     .category-underline {
@@ -210,15 +226,9 @@
     }
 
     @media (min-width: 768px) {
-      .title {
-        font-size: 34px;
-      }
-      .item h2 {
-        font-size: 40px;
-      }
-      .item p {
-        font-size: 24px;
-      }
+      :root { --quick-top-offset: 110px; }
+      .item h2 { font-size: 40px; }
+      .item p { font-size: 24px; }
     }
   </style>
 </head>
@@ -235,8 +245,10 @@
       </svg>
     </div>
 
-    <!-- <h1 class="title">غذای اصلی</h1>
-    <div class="underline"></div> -->
+    <!-- Sticky quick access (auto-filled by JS when categories load) -->
+    <div class="quick-access-wrap" id="quick-access-wrap" style="display:none;">
+      <div id="category-quick-access" class="quick-access" aria-label="دسترسی سریع دسته‌بندی‌ها"></div>
+    </div>
 
     <div id="loading" class="loading">بارگذاری منو...</div>
     <div id="error"></div>
@@ -250,82 +262,117 @@
   <!-- ===== Footer Wave ===== -->
   <div class="wave wave-footer"></div>
 
-  <a href="/admin/" class="admin-link">مدیریت</a>
-
   <script>
+    // ===== Helpers =====
+    function el(id) { return document.getElementById(id); }
+
     // Lazy load images using Intersection Observer
     function setupLazyLoading() {
       const images = document.querySelectorAll("img[data-src]");
+      if (!("IntersectionObserver" in window)) {
+        images.forEach(img => { img.src = img.dataset.src; img.classList.add("loaded"); });
+        return;
+      }
+
       const imageObserver = new IntersectionObserver((entries, observer) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             const img = entry.target;
             img.src = img.dataset.src;
-            img.classList.add("loaded");
+            img.addEventListener("load", () => img.classList.add("loaded"), { once: true });
             observer.unobserve(img);
           }
         });
-      });
+      }, { rootMargin: "150px 0px" });
 
       images.forEach((img) => imageObserver.observe(img));
     }
 
-    async function loadMenu() {
-      try {
-        // Fetch categories and items
-        const categoriesResponse = await fetch("/api/categories");
-        const itemsResponse = await fetch("/api/items");
+    // Scroll with offset + button highlight
+    function scrollToCategory(categoryId) {
+      const target = document.getElementById("cat-" + categoryId);
+      if (!target) return;
 
-        if (!categoriesResponse.ok || !itemsResponse.ok) {
-          throw new Error("Failed to load menu");
-        }
+      const offset = parseInt(getComputedStyle(document.documentElement)
+        .getPropertyValue("--quick-top-offset")) || 0;
 
-        const categories = await categoriesResponse.json();
-        const items = await itemsResponse.json();
-        const container = document.getElementById("menu-container");
-        const loading = document.getElementById("loading");
+      const y = target.getBoundingClientRect().top + window.pageYOffset - offset;
+      window.scrollTo({ top: y, behavior: "smooth" });
 
-        if (items.length === 0) {
-          loading.textContent = "منو خالی است";
-          return;
-        }
+      setActiveQuickBtn(categoryId, true);
+    }
 
-        loading.style.display = "none";
+    function setActiveQuickBtn(categoryId, ensureVisible) {
+      const btns = document.querySelectorAll(".quick-btn");
+      btns.forEach(b => b.classList.remove("active"));
 
-        // Group items by category
-        if (categories.length === 0) {
-          // No categories, display all items
-          items.forEach((item) => {
-            container.innerHTML += renderItem(item);
-          });
-        } else {
-          // Display items grouped by category
-          categories.forEach((category) => {
-            const categoryItems = items.filter((item) => item.category === category.id);
-            if (categoryItems.length > 0) {
-              // Add category title
-              const categoryHTML = `
-                <h2 class="category-title">${category.name}</h2>
-                <div class="category-underline"></div>
-              `;
-              container.innerHTML += categoryHTML;
+      const active = document.querySelector(`.quick-btn[data-cat='${categoryId}']`);
+      if (!active) return;
 
-              // Add items for this category
-              categoryItems.forEach((item) => {
-                container.innerHTML += renderItem(item);
-              });
-            }
-          });
-        }
+      active.classList.add("active");
 
-        setupLazyLoading();
-      } catch (error) {
-        console.error("Error loading menu:", error);
-        document.getElementById("loading").style.display = "none";
-        document.getElementById("error").innerHTML = `<div class="error">خطا در بارگذاری منو</div>`;
+      if (ensureVisible) {
+        active.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
       }
     }
 
+    function setupCategorySpy(categories) {
+      // Highlights the active category while scrolling
+      if (!("IntersectionObserver" in window)) return;
+
+      const options = {
+        root: null,
+        // When the title crosses near the top, set active.
+        rootMargin: "-35% 0px -55% 0px",
+        threshold: 0
+      };
+
+      const observer = new IntersectionObserver((entries) => {
+        // Find the most "visible" entry that is intersecting
+        const visible = entries
+          .filter(e => e.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+
+        if (!visible) return;
+
+        const id = visible.target.getAttribute("data-cat-id");
+        if (id) setActiveQuickBtn(id, false);
+      }, options);
+
+      categories.forEach(cat => {
+        const titleEl = document.getElementById("cat-" + cat.id);
+        if (titleEl) observer.observe(titleEl);
+      });
+    }
+
+    function buildQuickAccess(categories) {
+      const wrap = el("quick-access-wrap");
+      const qa = el("category-quick-access");
+      if (!wrap || !qa) return;
+
+      if (!categories || categories.length === 0) {
+        wrap.style.display = "none";
+        return;
+      }
+
+      wrap.style.display = "block";
+      qa.innerHTML = "";
+
+      categories.forEach((category) => {
+        const btn = document.createElement("button");
+        btn.className = "quick-btn";
+        btn.type = "button";
+        btn.textContent = category.name;
+        btn.setAttribute("data-cat", category.id);
+        btn.addEventListener("click", () => scrollToCategory(category.id));
+        qa.appendChild(btn);
+      });
+
+      // default active = first
+      setActiveQuickBtn(categories[0].id, false);
+    }
+
+    // ===== Rendering =====
     function renderItem(item) {
       return `
         <div class="item">
@@ -345,7 +392,67 @@
       `;
     }
 
-    // Load menu on page load
+    async function loadMenu() {
+      try {
+        const categoriesResponse = await fetch("/api/categories");
+        const itemsResponse = await fetch("/api/items");
+
+        if (!categoriesResponse.ok || !itemsResponse.ok) {
+          throw new Error("Failed to load menu");
+        }
+
+        const categories = await categoriesResponse.json();
+        const items = await itemsResponse.json();
+
+        const container = el("menu-container");
+        const loading = el("loading");
+
+        if (!items || items.length === 0) {
+          loading.textContent = "منو خالی است";
+          el("quick-access-wrap").style.display = "none";
+          return;
+        }
+
+        loading.style.display = "none";
+
+        // If there are categories, build quick access + render grouped sections
+        if (categories && categories.length > 0) {
+          buildQuickAccess(categories);
+
+          categories.forEach((category) => {
+            const categoryItems = items.filter((item) => item.category === category.id);
+            if (categoryItems.length === 0) return;
+
+            const categoryHTML = `
+              <h2 id="cat-${category.id}" data-cat-id="${category.id}" class="category-title">${category.name}</h2>
+              <div class="category-underline"></div>
+            `;
+            container.innerHTML += categoryHTML;
+
+            categoryItems.forEach((item) => {
+              container.innerHTML += renderItem(item);
+            });
+          });
+
+          setupCategorySpy(categories);
+        } else {
+          // No categories, display all items (and hide quick access)
+          el("quick-access-wrap").style.display = "none";
+          items.forEach((item) => {
+            container.innerHTML += renderItem(item);
+          });
+        }
+
+        setupLazyLoading();
+      } catch (error) {
+        console.error("Error loading menu:", error);
+        el("loading").style.display = "none";
+        el("error").innerHTML = `<div class="error">خطا در بارگذاری منو</div>`;
+        const wrap = el("quick-access-wrap");
+        if (wrap) wrap.style.display = "none";
+      }
+    }
+
     loadMenu();
   </script>
 </body>
