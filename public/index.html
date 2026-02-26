@@ -15,241 +15,233 @@
       font-display: swap;
     }
 
-    :root {
+    :root{
       --waves: 5;
       --bg: #ded7c5;
       --maroon: #5b2b2f;
       --max: 900px;
 
-      /* quick access behavior */
-      --quick-top-offset: 90px; /* adjust if you add a fixed header */
+      /* how much to offset scroll when header is sticky */
+      --sticky-offset: 160px;
     }
 
-    @media (min-width: 900px) {
-      :root { --waves: 10; }
+    @media (min-width: 900px){
+      :root{ --waves: 10; }
     }
 
-    * { box-sizing: border-box; }
+    @media (min-width: 768px){
+      :root{ --sticky-offset: 190px; }
+    }
 
-    html { scroll-behavior: smooth; }
+    *{ box-sizing: border-box; }
 
-    body {
-      margin: 0;
+    html{ scroll-behavior: smooth; }
+
+    body{
+      margin:0;
       background: var(--bg);
       font-family: "Morabba", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
       color: var(--maroon);
-      text-align: center;
+      text-align:center;
     }
 
-    /* ====== Wave SVG container ====== */
-    .wave svg { display: block; width: 100%; height: 50px; }
-
-    .wave {
-      height: 28px;
+    /* ===== Waves ===== */
+    .wave{
+      height:28px;
       background-repeat: repeat-x;
-      background-position: center;
+      background-position:center;
       background-size: calc(100% / var(--waves)) 100%;
     }
 
-    .wave-header {
+    .wave-header{
       background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 26' preserveAspectRatio='none'><path fill='%235B2B2F' d='M0 0 H200 V10 C166 10 152 26 100 26 C48 26 34 10 0 10 Z'/></svg>");
     }
 
-    .wave-footer {
+    .wave-footer{
       background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 26' preserveAspectRatio='none'><path fill='%235B2B2F' d='M0 26 H200 V16 C166 16 152 0 100 0 C48 0 34 16 0 16 Z'/></svg>");
-      display: block;
-      min-height: 28px;
+      display:block;
+      min-height:28px;
     }
 
-    /* ====== Main Container ====== */
-    .container {
-      max-width: var(--max);
-      margin: auto;
-      padding: 20px 20px 30px;
-    }
-
-    /* ====== Logo ====== */
-    .logo {
-      width: 100%;
-      max-width: 520px;
-      margin: 10px auto 18px;
-      display: block;
-    }
-
-    .logo-svg { display: block; width: 100%; height: auto; }
-
-    /* ====== Quick Category Access ====== */
-    .quick-access-wrap {
+    /* ===== Sticky Header (logo + quick access) ===== */
+    .sticky-header{
       position: sticky;
       top: 0;
-      z-index: 50;
+      z-index: 100;
       background: var(--bg);
-      padding: 10px 0 16px;
-      margin-bottom: 10px;
+      padding: 10px 20px 12px;
       border-bottom: 1px solid rgba(91, 43, 47, 0.12);
       backdrop-filter: blur(6px);
     }
 
-    .quick-access {
-      display: flex;
-      gap: 10px;
-      overflow-x: auto;
-      padding: 0 2px;
-      scroll-behavior: smooth;
-      -webkit-overflow-scrolling: touch;
+    .sticky-inner{
+      max-width: var(--max);
+      margin: 0 auto;
     }
 
-    .quick-access::-webkit-scrollbar { display: none; }
-
-    .quick-btn {
-      flex: 0 0 auto;
-      background: #ffffff;
-      border: 2px solid var(--maroon);
-      color: var(--maroon);
-      padding: 8px 14px;
-      border-radius: 999px;
-      font-size: 14px;
-      font-weight: 800;
-      cursor: pointer;
-      white-space: nowrap;
-      transition: transform 0.15s ease, background 0.15s ease, color 0.15s ease;
-    }
-
-    .quick-btn:active { transform: scale(0.98); }
-
-    .quick-btn:hover,
-    .quick-btn.active {
-      background: var(--maroon);
-      color: #fff;
-    }
-
-    /* ====== Menu Items ====== */
-    .item { margin: 36px 0; }
-
-    .img-frame {
+    /* Logo */
+    .logo{
       width: 100%;
       max-width: 520px;
-      height: 300px;
-      margin: 0 auto 16px;
-      border-radius: 18px;
-      overflow: hidden;
-      position: relative;
-      background: #ddd;
+      margin: 6px auto 8px;
+      display:block;
+    }
+    .logo-svg{ display:block; width:100%; height:auto; }
+
+    /* Quick access: centered text with separators */
+    .quick-access{
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: nowrap;
+      gap: 0;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 6px 0 2px;
+      scrollbar-width: none;
+    }
+    .quick-access::-webkit-scrollbar{ display:none; }
+
+    .quick-link{
+      background: transparent;
+      border: 0;
+      padding: 6px 8px;
+      margin: 0;
+      font: inherit;
+      color: var(--maroon);
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 800;
+      white-space: nowrap;
+      text-decoration: none;
+      text-underline-offset: 8px;
     }
 
-    .img-frame img {
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      object-fit: cover;
-      opacity: 0;
+    .quick-link.active{
+      text-decoration: underline;
+      text-decoration-thickness: 3px;
+    }
+
+    .quick-sep{
+      padding: 0 6px;
+      font-weight: 800;
+      opacity: 0.55;
+      user-select: none;
+    }
+
+    /* ===== Main Container ===== */
+    .container{
+      max-width: var(--max);
+      margin: auto;
+      padding: 18px 20px 30px;
+    }
+
+    /* ===== Menu Items ===== */
+    .item{ margin: 36px 0; }
+
+    .img-frame{
+      width:100%;
+      max-width:520px;
+      height:300px;
+      margin:0 auto 16px;
+      border-radius:18px;
+      overflow:hidden;
+      position:relative;
+      background:#ddd;
+    }
+
+    .img-frame img{
+      position:absolute;
+      top:0; left:0;
+      width:100%; height:100%;
+      object-fit:cover;
+      opacity:0;
       transition: opacity 0.3s;
     }
 
-    .img-frame img.loaded { opacity: 1; }
+    .img-frame img.loaded{ opacity:1; }
 
-    .img-frame .placeholder {
-      position: absolute;
-      top: 50%; left: 50%;
-      transform: translate(-50%, -50%);
-      color: #999;
-      font-size: 14px;
+    .item h2{
+      margin:0;
+      font-size:32px;
+      font-weight:900;
+      letter-spacing:2px;
     }
 
-    .item h2 {
-      margin: 0;
-      font-size: 32px;
-      font-weight: 900;
-      letter-spacing: 2px;
+    .item p{
+      margin:8px 0 0;
+      font-size:20px;
+      font-weight:700;
     }
 
-    .item p {
-      margin: 8px 0 0;
-      font-size: 20px;
-      font-weight: 700;
+    .price{
+      margin-top:8px;
+      font-size:18px;
+      font-weight:800;
+      color:#591d2a;
     }
 
-    .price {
-      margin-top: 8px;
-      font-size: 18px;
-      font-weight: 800;
-      color: #591d2a;
-    }
-
-    .category-title {
-      font-size: 28px;
-      font-weight: 900;
+    .category-title{
+      font-size:28px;
+      font-weight:900;
       margin: 56px 0 16px;
-      scroll-margin-top: var(--quick-top-offset);
+      scroll-margin-top: var(--sticky-offset);
     }
 
-    .category-underline {
-      width: 200px;
-      height: 4px;
+    .category-underline{
+      width:200px;
+      height:4px;
       background: var(--maroon);
-      margin: 12px auto 30px;
-      border-radius: 4px;
+      margin:12px auto 30px;
+      border-radius:4px;
     }
 
-    .note {
-      margin-top: 40px;
-      font-size: 16px;
-      font-weight: 700;
+    .note{
+      margin-top:40px;
+      font-size:16px;
+      font-weight:700;
     }
 
-    .admin-link {
-      position: fixed;
-      bottom: 20px;
-      left: 20px;
-      background: var(--maroon);
-      color: white;
-      padding: 10px 15px;
-      border-radius: 8px;
-      text-decoration: none;
-      font-size: 12px;
-      font-weight: 700;
-      z-index: 1000;
+    .loading{
+      text-align:center;
+      padding: 30px 20px;
+      color:#999;
     }
 
-    .loading {
-      text-align: center;
-      padding: 40px 20px;
-      color: #999;
+    .error{
+      background:#f8d7da;
+      color:#721c24;
+      padding:20px;
+      border-radius:8px;
+      margin:20px 0;
     }
 
-    .error {
-      background: #f8d7da;
-      color: #721c24;
-      padding: 20px;
-      border-radius: 8px;
-      margin: 20px 0;
-    }
-
-    @media (min-width: 768px) {
-      :root { --quick-top-offset: 110px; }
-      .item h2 { font-size: 40px; }
-      .item p { font-size: 24px; }
+    @media (min-width: 768px){
+      .item h2{ font-size:40px; }
+      .item p{ font-size:24px; }
+      .quick-link{ font-size: 17px; }
     }
   </style>
 </head>
 
 <body>
-  <!-- ===== Header Wave ===== -->
+  <!-- Wave stays above sticky header -->
   <div class="wave wave-header"></div>
 
+  <!-- Sticky header includes logo + quick access -->
+  <header class="sticky-header">
+    <div class="sticky-inner">
+      <div class="logo" aria-label="CUCINETTA logo">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8984.11 1296.16" role="img" aria-label="CUCINETTA" class="logo-svg">
+          <path fill="#591D2A" d="M7449.89 1246.15l660.91 -0.06c32.28,-29.92 307.65,-467.77 331.54,-517.99l474.41 -2.71 0 563 67.37 7.76 -2.68 -1093.02 -64.77 -0.22 0.08 457.75 -422.32 -0.02c19.77,-53.29 105.2,-171.1 140.35,-227.51 39.65,-63.62 117.27,-167.62 144.08,-232.57l-669.36 0c-59.84,115.64 -393.02,611.93 -495.89,781.78 -46.74,77.18 -132,188.16 -163.72,263.81zm-4041.76 -1049.48l0.23 1051.44 64.02 0 3.31 -935.57c14.24,8.53 665.31,816.9 714.59,896.68 12.36,20.01 9.07,21.09 21.07,38.86l561.45 3.42 0.01 -1061.34 -569.19 1.16 -2.72 915.85c-35.27,-31.87 -63.87,-74.24 -95.23,-114.74 -34.28,-44.29 -62.69,-78.01 -97.05,-121.12l-518.59 -656.69c-29.63,-31.66 -27.77,-24.16 -81.9,-17.94zm1449.82 149.26l-9.65 895.7c97.19,11.61 856.05,4 1016.42,3.87l-0.07 -558.81 -943.71 -4.18 0.04 -157.13 473.2 -2.6 -0.24 -67.6 -472.97 -0.33 0.01 -179.03 475.8 -2.6 -0.07 -64.85 -548.42 0.34 9.66 137.23zm-4857.94 -114.24c10.06,100.74 -0.17,894.93 0,1018.99 260.32,0 786.62,9.6 1016.39,-1.96l-0.24 -554.89 -943.42 -4.53 -2.64 -426.48 475.71 -0.62 -0.01 -57.77c-68.13,-18.8 -445.79,-6.47 -545.79,-6.47l0 33.73zm2167.32 1013.79l1017.1 5.35 -2.45 -559.03 -943.82 -2.05 0.01 -424.34 475.8 -2.6 -0.07 -64.85 -540.66 0.24 -5.91 1047.28zm4521.51 -974.83l101.42 2.57 0 967.06 569.25 0 2.53 -967.06 473.14 -0.62 -0.01 -57.77c-49.34,-13.61 -1056.58,-14.21 -1146.34,-3.26l0 59.07zm-1219.2 2.57l467.87 0 0.07 967.06 571.85 0 -0.07 -967.06 106.65 0 -0.07 -64.85 -1146.37 0 0.07 64.85zm-4383.65 972.93l1011.82 2.02 -2.91 -896.84 -64.63 3.76 0.02 334.21 -876.11 0 -0.9 -337.97 -57.26 0.02c-17.51,62.42 -18.37,791.82 -10.02,894.81zm2168.76 7.13l67.67 -3.46 -0.21 -1044.06 -67.4 -6.22 -0.06 1053.74zm93.45 -1187.96c0,-65.23 -33.54,-70.18 -96.78,-62.69 -25.66,38.3 -50.23,77.01 -3.3,111.37 44,32.22 100.08,8.84 100.08,-48.68z" />
+        </svg>
+      </div>
+
+      <nav id="category-quick-access" class="quick-access" aria-label="دسترسی سریع دسته‌بندی‌ها" style="display:none;"></nav>
+    </div>
+  </header>
+
   <div class="container">
-    <!-- Logo SVG -->
-    <div class="logo" aria-label="CUCINETTA logo">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8984.11 1296.16" role="img" aria-label="CUCINETTA" class="logo-svg">
-        <path fill="#591D2A" d="M7449.89 1246.15l660.91 -0.06c32.28,-29.92 307.65,-467.77 331.54,-517.99l474.41 -2.71 0 563 67.37 7.76 -2.68 -1093.02 -64.77 -0.22 0.08 457.75 -422.32 -0.02c19.77,-53.29 105.2,-171.1 140.35,-227.51 39.65,-63.62 117.27,-167.62 144.08,-232.57l-669.36 0c-59.84,115.64 -393.02,611.93 -495.89,781.78 -46.74,77.18 -132,188.16 -163.72,263.81zm-4041.76 -1049.48l0.23 1051.44 64.02 0 3.31 -935.57c14.24,8.53 665.31,816.9 714.59,896.68 12.36,20.01 9.07,21.09 21.07,38.86l561.45 3.42 0.01 -1061.34 -569.19 1.16 -2.72 915.85c-35.27,-31.87 -63.87,-74.24 -95.23,-114.74 -34.28,-44.29 -62.69,-78.01 -97.05,-121.12l-518.59 -656.69c-29.63,-31.66 -27.77,-24.16 -81.9,-17.94zm1449.82 149.26l-9.65 895.7c97.19,11.61 856.05,4 1016.42,3.87l-0.07 -558.81 -943.71 -4.18 0.04 -157.13 473.2 -2.6 -0.24 -67.6 -472.97 -0.33 0.01 -179.03 475.8 -2.6 -0.07 -64.85 -548.42 0.34 9.66 137.23zm-4857.94 -114.24c10.06,100.74 -0.17,894.93 0,1018.99 260.32,0 786.62,9.6 1016.39,-1.96l-0.24 -554.89 -943.42 -4.53 -2.64 -426.48 475.71 -0.62 -0.01 -57.77c-68.13,-18.8 -445.79,-6.47 -545.79,-6.47l0 33.73zm2167.32 1013.79l1017.1 5.35 -2.45 -559.03 -943.82 -2.05 0.01 -424.34 475.8 -2.6 -0.07 -64.85 -540.66 0.24 -5.91 1047.28zm4521.51 -974.83l101.42 2.57 0 967.06 569.25 0 2.53 -967.06 473.14 -0.62 -0.01 -57.77c-49.34,-13.61 -1056.58,-14.21 -1146.34,-3.26l0 59.07zm-1219.2 2.57l467.87 0 0.07 967.06 571.85 0 -0.07 -967.06 106.65 0 -0.07 -64.85 -1146.37 0 0.07 64.85zm-4383.65 972.93l1011.82 2.02 -2.91 -896.84 -64.63 3.76 0.02 334.21 -876.11 0 -0.9 -337.97 -57.26 0.02c-17.51,62.42 -18.37,791.82 -10.02,894.81zm2168.76 7.13l67.67 -3.46 -0.21 -1044.06 -67.4 -6.22 -0.06 1053.74zm93.45 -1187.96c0,-65.23 -33.54,-70.18 -96.78,-62.69 -25.66,38.3 -50.23,77.01 -3.3,111.37 44,32.22 100.08,8.84 100.08,-48.68z" />
-      </svg>
-    </div>
-
-    <!-- Sticky quick access (auto-filled by JS when categories load) -->
-    <div class="quick-access-wrap" id="quick-access-wrap" style="display:none;">
-      <div id="category-quick-access" class="quick-access" aria-label="دسترسی سریع دسته‌بندی‌ها"></div>
-    </div>
-
     <div id="loading" class="loading">بارگذاری منو...</div>
     <div id="error"></div>
     <div id="menu-container"></div>
@@ -259,130 +251,122 @@
     </div>
   </div>
 
-  <!-- ===== Footer Wave ===== -->
   <div class="wave wave-footer"></div>
 
   <script>
-    // ===== Helpers =====
-    function el(id) { return document.getElementById(id); }
+    function el(id){ return document.getElementById(id); }
 
-    // Lazy load images using Intersection Observer
-    function setupLazyLoading() {
+    // Lazy load images
+    function setupLazyLoading(){
       const images = document.querySelectorAll("img[data-src]");
-      if (!("IntersectionObserver" in window)) {
+      if (!("IntersectionObserver" in window)){
         images.forEach(img => { img.src = img.dataset.src; img.classList.add("loaded"); });
         return;
       }
 
-      const imageObserver = new IntersectionObserver((entries, observer) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
+      const imageObserver = new IntersectionObserver((entries, observer)=>{
+        entries.forEach(entry=>{
+          if (entry.isIntersecting){
             const img = entry.target;
             img.src = img.dataset.src;
-            img.addEventListener("load", () => img.classList.add("loaded"), { once: true });
+            img.addEventListener("load", ()=>img.classList.add("loaded"), { once:true });
             observer.unobserve(img);
           }
         });
       }, { rootMargin: "150px 0px" });
 
-      images.forEach((img) => imageObserver.observe(img));
+      images.forEach(img=>imageObserver.observe(img));
     }
 
-    // Scroll with offset + button highlight
-    function scrollToCategory(categoryId) {
-      const target = document.getElementById("cat-" + categoryId);
+    function setActiveQuick(catId, ensureVisible){
+      document.querySelectorAll(".quick-link").forEach(a => a.classList.remove("active"));
+      const active = document.querySelector(`.quick-link[data-cat='${catId}']`);
+      if (!active) return;
+      active.classList.add("active");
+      if (ensureVisible){
+        active.scrollIntoView({ behavior:"smooth", inline:"center", block:"nearest" });
+      }
+    }
+
+    function scrollToCategory(catId){
+      const target = document.getElementById("cat-" + catId);
       if (!target) return;
 
       const offset = parseInt(getComputedStyle(document.documentElement)
-        .getPropertyValue("--quick-top-offset")) || 0;
+        .getPropertyValue("--sticky-offset")) || 0;
 
       const y = target.getBoundingClientRect().top + window.pageYOffset - offset;
       window.scrollTo({ top: y, behavior: "smooth" });
 
-      setActiveQuickBtn(categoryId, true);
+      setActiveQuick(catId, true);
     }
 
-    function setActiveQuickBtn(categoryId, ensureVisible) {
-      const btns = document.querySelectorAll(".quick-btn");
-      btns.forEach(b => b.classList.remove("active"));
+    function buildQuickAccess(categories){
+      const nav = el("category-quick-access");
+      if (!nav) return;
 
-      const active = document.querySelector(`.quick-btn[data-cat='${categoryId}']`);
-      if (!active) return;
-
-      active.classList.add("active");
-
-      if (ensureVisible) {
-        active.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+      if (!categories || categories.length === 0){
+        nav.style.display = "none";
+        return;
       }
+
+      nav.style.display = "flex";
+      nav.innerHTML = "";
+
+      categories.forEach((cat, idx)=>{
+        const a = document.createElement("button");
+        a.type = "button";
+        a.className = "quick-link";
+        a.textContent = cat.name;
+        a.setAttribute("data-cat", cat.id);
+        a.addEventListener("click", ()=>scrollToCategory(cat.id));
+        nav.appendChild(a);
+
+        if (idx < categories.length - 1){
+          const sep = document.createElement("span");
+          sep.className = "quick-sep";
+          sep.textContent = " | ";
+          nav.appendChild(sep);
+        }
+      });
+
+      setActiveQuick(categories[0].id, false);
     }
 
-    function setupCategorySpy(categories) {
-      // Highlights the active category while scrolling
+    function setupCategorySpy(categories){
       if (!("IntersectionObserver" in window)) return;
 
-      const options = {
-        root: null,
-        // When the title crosses near the top, set active.
-        rootMargin: "-35% 0px -55% 0px",
-        threshold: 0
-      };
-
-      const observer = new IntersectionObserver((entries) => {
-        // Find the most "visible" entry that is intersecting
+      const observer = new IntersectionObserver((entries)=>{
         const visible = entries
           .filter(e => e.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+          .sort((a,b)=> b.intersectionRatio - a.intersectionRatio)[0];
 
         if (!visible) return;
 
         const id = visible.target.getAttribute("data-cat-id");
-        if (id) setActiveQuickBtn(id, false);
-      }, options);
+        if (id) setActiveQuick(id, false);
+      }, {
+        root: null,
+        rootMargin: "-35% 0px -55% 0px",
+        threshold: 0
+      });
 
-      categories.forEach(cat => {
-        const titleEl = document.getElementById("cat-" + cat.id);
-        if (titleEl) observer.observe(titleEl);
+      categories.forEach(cat=>{
+        const title = document.getElementById("cat-" + cat.id);
+        if (title) observer.observe(title);
       });
     }
 
-    function buildQuickAccess(categories) {
-      const wrap = el("quick-access-wrap");
-      const qa = el("category-quick-access");
-      if (!wrap || !qa) return;
-
-      if (!categories || categories.length === 0) {
-        wrap.style.display = "none";
-        return;
-      }
-
-      wrap.style.display = "block";
-      qa.innerHTML = "";
-
-      categories.forEach((category) => {
-        const btn = document.createElement("button");
-        btn.className = "quick-btn";
-        btn.type = "button";
-        btn.textContent = category.name;
-        btn.setAttribute("data-cat", category.id);
-        btn.addEventListener("click", () => scrollToCategory(category.id));
-        qa.appendChild(btn);
-      });
-
-      // default active = first
-      setActiveQuickBtn(categories[0].id, false);
-    }
-
-    // ===== Rendering =====
-    function renderItem(item) {
+    function renderItem(item){
       return `
         <div class="item">
           ${
             item.image
               ? `
-            <div class="img-frame">
-              <img alt="${item.name}" data-src="${item.image}" />
-            </div>
-          `
+                <div class="img-frame">
+                  <img alt="${item.name}" data-src="${item.image}" />
+                </div>
+              `
               : ""
           }
           <h2>${item.name}</h2>
@@ -392,12 +376,12 @@
       `;
     }
 
-    async function loadMenu() {
-      try {
+    async function loadMenu(){
+      try{
         const categoriesResponse = await fetch("/api/categories");
         const itemsResponse = await fetch("/api/items");
 
-        if (!categoriesResponse.ok || !itemsResponse.ok) {
+        if (!categoriesResponse.ok || !itemsResponse.ok){
           throw new Error("Failed to load menu");
         }
 
@@ -407,49 +391,44 @@
         const container = el("menu-container");
         const loading = el("loading");
 
-        if (!items || items.length === 0) {
+        if (!items || items.length === 0){
           loading.textContent = "منو خالی است";
-          el("quick-access-wrap").style.display = "none";
+          el("category-quick-access").style.display = "none";
           return;
         }
 
         loading.style.display = "none";
 
-        // If there are categories, build quick access + render grouped sections
-        if (categories && categories.length > 0) {
+        if (categories && categories.length > 0){
           buildQuickAccess(categories);
 
-          categories.forEach((category) => {
-            const categoryItems = items.filter((item) => item.category === category.id);
+          categories.forEach(category=>{
+            const categoryItems = items.filter(i => i.category === category.id);
             if (categoryItems.length === 0) return;
 
-            const categoryHTML = `
+            container.innerHTML += `
               <h2 id="cat-${category.id}" data-cat-id="${category.id}" class="category-title">${category.name}</h2>
               <div class="category-underline"></div>
             `;
-            container.innerHTML += categoryHTML;
 
-            categoryItems.forEach((item) => {
+            categoryItems.forEach(item=>{
               container.innerHTML += renderItem(item);
             });
           });
 
           setupCategorySpy(categories);
         } else {
-          // No categories, display all items (and hide quick access)
-          el("quick-access-wrap").style.display = "none";
-          items.forEach((item) => {
-            container.innerHTML += renderItem(item);
-          });
+          el("category-quick-access").style.display = "none";
+          items.forEach(item => { container.innerHTML += renderItem(item); });
         }
 
         setupLazyLoading();
-      } catch (error) {
-        console.error("Error loading menu:", error);
+      } catch (err){
+        console.error("Error loading menu:", err);
         el("loading").style.display = "none";
         el("error").innerHTML = `<div class="error">خطا در بارگذاری منو</div>`;
-        const wrap = el("quick-access-wrap");
-        if (wrap) wrap.style.display = "none";
+        const nav = el("category-quick-access");
+        if (nav) nav.style.display = "none";
       }
     }
 
